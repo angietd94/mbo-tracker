@@ -394,14 +394,11 @@ app/
 3. **CSRF Protection**: All forms are protected against Cross-Site Request Forgery.
 4. **Secure Headers**: HTTP security headers are set using Flask-Talisman.
 5. **Audit Logging**: Security events are logged for auditing purposes.
-
-## License
-
-[MIT License](LICENSE)
-=======
 6. **Database Security**: Parameterized queries prevent SQL injection.
 7. **Input Validation**: All user inputs are validated before processing.
 8. **Session Management**: Secure session handling with Flask-Login.
+
+
 
 ## 🤝 Contributing
 
