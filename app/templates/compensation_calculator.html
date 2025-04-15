@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>Compensation Calculator</h1>
+
+<div class="calculator-container" style="display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px;">
+    <!-- Calculator Form -->
+    <div class="calculator-form" style="flex: 1; min-width: 300px; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 25px;">
+        <h2 style="color: #0046ad; margin-top: 0; border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">MBO Compensation Calculator</h2>
+        
+        <form id="calculator-form">
+            <div style="margin-bottom: 20px;">
+                <label for="total-compensation" style="display: block; margin-bottom: 8px; font-weight: 500;">Total Annual Compensation:</label>
+                <input type="number" id="total-compensation" name="total-compensation" value="" step="0.01" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;" placeholder="Enter your total annual compensation">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="mbo-percentage" style="display: block; margin-bottom: 8px; font-weight: 500;">MBO Percentage (%):</label>
+                <input type="number" id="mbo-percentage" name="mbo-percentage" value="15" min="0" max="100" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;" placeholder="Enter MBO percentage (default: 15%)">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="achievement-percentage" style="display: block; margin-bottom: 8px; font-weight: 500;">Achievement Percentage (%):</label>
+                <input type="number" id="achievement-percentage" name="achievement-percentage" value="100" min="0" max="150" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;" placeholder="Enter your achievement percentage (0-150%)">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="tax-rate" style="display: block; margin-bottom: 8px; font-weight: 500;">Tax Rate (%):</label>
+                <input type="number" id="tax-rate" name="tax-rate" value="30" min="0" max="100" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;" placeholder="Enter your tax rate (default: 30%)">
+            </div>
+            
+            <button type="button" id="calculate-btn" style="background-color: #0046ad; color: white; border: none; padding: 12px 20px; border-radius: 4px; font-weight: 500; cursor: pointer; width: 100%;">Calculate</button>
+        </form>
+    </div>
+    
+    <!-- Results Display -->
+    <div class="calculator-results" style="flex: 1; min-width: 300px; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 25px;">
+        <h2 style="color: #0046ad; margin-top: 0; border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">Results</h2>
+        
+        <div id="results-container">
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 5px;">Annual MBO Compensation:</h3>
+                <p id="annual-mbo" style="font-size: 24px; font-weight: bold; margin-top: 0; color: #0046ad;">$0.00</p>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 5px;">Quarterly MBO Compensation:</h3>
+                <p id="quarterly-mbo" style="font-size: 24px; font-weight: bold; margin-top: 0; color: #28a745;">$0.00</p>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 5px;">This Quarter's Achievement:</h3>
+                <p id="achievement-amount" style="font-size: 24px; font-weight: bold; margin-top: 0; color: #17a2b8;">$0.00</p>
+            </div>
+            
+            <div style="margin-bottom: 20px; border-top: 1px solid #e9ecef; padding-top: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 5px;">After Tax Amount:</h3>
+                <p id="after-tax" style="font-size: 24px; font-weight: bold; margin-top: 0; color: #6c757d;">$0.00</p>
+            </div>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 20px;">
+            <p style="margin: 0; color: #6c757d; font-size: 14px;">
+                <strong>Note:</strong> This calculator provides an estimate based on the information you provide. Actual compensation may vary based on company policies and tax regulations.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const calculateBtn = document.getElementById('calculate-btn');
+        calculateBtn.addEventListener('click', calculateCompensation);
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return '$' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+        
+        // Calculate compensation
+        function calculateCompensation() {
+            // Get input values
+            const totalCompensation = parseFloat(document.getElementById('total-compensation').value) || 0;
+            const mboPercentage = parseFloat(document.getElementById('mbo-percentage').value) || 0;
+            const achievementPercentage = parseFloat(document.getElementById('achievement-percentage').value) || 0;
+            const taxRate = parseFloat(document.getElementById('tax-rate').value) || 0;
+            
+            // Calculate results
+            const annualMbo = totalCompensation * (mboPercentage / 100);
+            const quarterlyMbo = annualMbo / 4;
+            const achievementAmount = quarterlyMbo * (achievementPercentage / 100);
+            const afterTax = achievementAmount * (1 - (taxRate / 100));
+            
+            // Update results display
+            document.getElementById('annual-mbo').textContent = formatCurrency(annualMbo);
+            document.getElementById('quarterly-mbo').textContent = formatCurrency(quarterlyMbo);
+            document.getElementById('achievement-amount').textContent = formatCurrency(achievementAmount);
+            document.getElementById('after-tax').textContent = formatCurrency(afterTax);
+        }
+        
+        // Initial calculation if values are present
+        if (document.getElementById('total-compensation').value) {
+            calculateCompensation();
+        }
+    });
+</script>
+{% endblock %}

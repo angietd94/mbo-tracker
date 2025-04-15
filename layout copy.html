@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SnapLogic MBO Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <img src="{{ url_for('static', filename='img/snaplogic_logo.png') }}" alt="SnapLogic Logo" class="logo">
+      <span class="tracker-title">Solutions Engineer MBO Tracker</span>
+    </div>
+    <div class="top-bar-right">
+      <a href="{{ url_for('user_profile') }}">My Profile</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <ul>
+        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('team_mbos') }}">Team MBOs</a></li>
+        <li><a href="{{ url_for('my_mbos') }}">My MBOs</a></li>
+        <li><a href="{{ url_for('new_mbo') }}">New MBO</a></li>
+        {% if current_user.role == 'Manager' %}
+        <li><a href="{{ url_for('pending_approvals') }}">Pending Approvals</a></li>
+        <li><a href="{{ url_for('users') }}">Users</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <footer>
+    Website created by <a href="mailto:atdughetti@snaplogic.com">atdughetti@snaplogic.com</a>.
+  </footer>
+
+</body>
+</html>

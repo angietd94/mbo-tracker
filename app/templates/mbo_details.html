@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="content-container">
+    <h2>MBO Details</h2>
+    <p><strong>Title:</strong> {{ mbo.title }}</p>
+    <p><strong>Type:</strong>
+        {% if mbo.mbo_type == "Learning and Certification" %}
+            <img src="{{ url_for('static', filename='img/learning.png') }}" alt="Learning" style="height:24px; vertical-align:middle;">
+            <span style="background-color: #cce5ff; padding:2px 5px; border-radius:3px;">Learning and Certification</span>
+        {% elif mbo.mbo_type == "Demo & Assets" %}
+            <img src="{{ url_for('static', filename='img/demo.png') }}" alt="Demo" style="height:24px; vertical-align:middle;">
+            <span style="background-color: #d4edda; padding:2px 5px; border-radius:3px;">Demo & Assets</span>
+        {% elif mbo.mbo_type == "Impact Outside of Pod" %}
+            <img src="{{ url_for('static', filename='img/impact.png') }}" alt="Impact" style="height:24px; vertical-align:middle;">
+            <span style="background-color: #f8d7da; padding:2px 5px; border-radius:3px;">Impact Outside of Pod</span>
+        {% else %}
+            {{ mbo.mbo_type }}
+        {% endif %}
+    </p>
+    <p><strong>Description:</strong></p>
+    <p>{{ mbo.description }}</p>
+    <p><strong>Link:</strong>
+        {% if mbo.optional_link %}
+            <a href="{{ mbo.optional_link }}" target="_blank">{{ mbo.optional_link }}</a>
+        {% else %}
+            None
+        {% endif %}
+    </p>
+    <p><strong>Status:</strong> {{ mbo.current_status }}</p>
+    <p><strong>Points:</strong> {{ mbo.points }}</p>
+    <p><strong>Created At:</strong> {{ mbo.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+</div>
+
+{% if current_user.role == 'Manager' %}
+  <h3>Edit MBO</h3>
+  <form method="POST" action="{{ url_for('edit_mbo', mbo_id=mbo.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Title:</label>
+    <input type="text" name="title" value="{{ mbo.title }}">
+
+    <label>Points:</label>
+    <input type="number" name="points" value="{{ mbo.points }}">
+
+    <label>Type:</label>
+    <select name="mbo_type">
+      <option value="Learning and Certification" {% if mbo.mbo_type == 'Learning and Certification' %}selected{% endif %}>Learning</option>
+      <option value="Demo & Assets" {% if mbo.mbo_type == 'Demo & Assets' %}selected{% endif %}>Demo</option>
+      <option value="Impact Outside of Pod" {% if mbo.mbo_type == 'Impact Outside of Pod' %}selected{% endif %}>Impact</option>
+    </select>
+
+    <button type="submit">Save Changes</button>
+  </form>
+{% endif %}
+
+
+
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Add New User</h2>
+    <form method="POST" action="{{ url_for('add_user') }}">
+         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+         <label>First Name</label>
+         <input type="text" name="first_name" required>
+         <label>Last Name</label>
+         <input type="text" name="last_name" required>
+         <label>Email</label>
+         <input type="email" name="email" required>
+         <label>Position</label>
+         <input type="text" name="position">
+         <label>Role</label>
+         <select name="role" required>
+             <option value="Employee">Employee</option>
+             <option value="Manager">Manager</option>
+         </select>
+         
+         <label>Region</label>
+         <select name="region">
+             <option value="EMEA">EMEA</option>
+             <option value="AMER">AMER</option>
+             <option value="APAC">APAC</option>
+         </select>
+         
+         <label>Manager</label>
+         <select name="manager_id">
+             <option value="">-- No Manager --</option>
+             {% for manager in managers %}
+                 <option value="{{ manager.id }}">
+                     {{ manager.first_name }} {{ manager.last_name }}
+                 </option>
+             {% endfor %}
+         </select>
+         
+         <label>Password</label>
+         <input type="password" name="password" required>
+         <button type="submit">Add User</button>
+    </form>
+</div>
+{% endblock %}

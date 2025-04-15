@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>User Profile</h2>
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('profile') }}">
+         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+         <label>First Name</label>
+         <input type="text" name="first_name" value="{{ current_user.first_name }}" required>
+         <label>Last Name</label>
+         <input type="text" name="last_name" value="{{ current_user.last_name }}" required>
+         <label>Email</label>
+         <input type="email" name="email" value="{{ current_user.email }}" readonly>
+         <label>Position</label>
+         <input type="text" name="position" value="{{ current_user.position }}">
+         
+         <label>Region</label>
+         <select name="region">
+             <option value="EMEA" {% if current_user.region == 'EMEA' %}selected{% endif %}>EMEA</option>
+             <option value="AMER" {% if current_user.region == 'AMER' %}selected{% endif %}>AMER</option>
+             <option value="APAC" {% if current_user.region == 'APAC' %}selected{% endif %}>APAC</option>
+         </select>
+         
+         <label>Manager</label>
+         <select name="manager_id">
+             <option value="">-- No Manager --</option>
+             {% for manager in managers %}
+                 <option value="{{ manager.id }}" {% if current_user.manager_id == manager.id %}selected{% endif %}>
+                     {{ manager.first_name }} {{ manager.last_name }}
+                 </option>
+             {% endfor %}
+         </select>
+         
+         <hr>
+         <h3>Change Password</h3>
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+         <label>New Password</label>
+         <input type="password" name="new_password">
+         <label>Confirm New Password</label>
+         <input type="password" name="confirm_password">
+         <button type="submit">Update Profile</button>
+<<<<<<< HEAD
+=======
+         <div style="display: flex; gap: 20px; align-items: flex-start;">
+             <div style="flex: 1;">
+                 <label>New Password</label>
+                 <input type="password" name="new_password">
+                 <label>Confirm New Password</label>
+                 <input type="password" name="confirm_password">
+             </div>
+             <div style="margin-top: 25px;">
+                 <p style="margin-bottom: 10px; color: #6c757d; font-size: 0.9em;">Or reset to default password:</p>
+                 <form action="{{ url_for('reset_password', user_id=current_user.id) }}" method="POST" style="display:inline;">
+                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                     <button type="submit" class="btn btn-warning" style="background-color: #ffc107; color: #212529; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Reset to Default</button>
+                 </form>
+             </div>
+         </div>
+         <button type="submit" style="margin-top: 20px;">Update Profile</button>
+>>>>>>> 6b472e0 (Update MBO Tracker application)
+=======
+>>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,613 @@
+/* General page setup */
+body {
+    font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* --- TOP BAR --- */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;        /* Increased height for modern look */
+    background-color: #0046ad; /* Snaplogic blue */
+    color: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    overflow-x: hidden;
+>>>>>>> 6b472e0 (Update MBO Tracker application)
+=======
+>>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+    z-index: 9999;
+    box-sizing: border-box;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Inside top bar: left side with logo + title */
+.top-bar-left {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+.top-bar-left .logo {
+    height: 40px;
+    margin-right: 15px;
+}
+.top-bar-left .tracker-title {
+    font-size: 1.4rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Inside top bar: right side for "My Profile", etc. */
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    height: 100%;
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    flex-wrap: wrap;
+>>>>>>> 6b472e0 (Update MBO Tracker application)
+=======
+>>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+}
+.top-bar-right a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 20px;
+    line-height: 70px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.top-bar-right a:hover {
+    color: #e6f0ff;
+}
+
+/* --- MAIN LAYOUT CONTAINER: offset from top bar --- */
+.container {
+    display: flex;
+    margin-top: 70px;    /* match top-bar height */
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* --- FIXED SIDEBAR ON THE LEFT --- */
+.sidebar {
+    position: fixed;
+    top: 70px;           /* place it directly below the top bar */
+    left: 0;
+    width: 220px;
+    height: calc(100% - 70px);
+    background-color: #ffffff;
+    padding: 20px 0;
+    box-sizing: border-box;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    border-right: 1px solid #e9ecef;
+}
+
+/* Sidebar list styles */
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.sidebar li {
+    margin: 5px 0;
+}
+.sidebar a {
+    display: block;
+    text-decoration: none;
+    color: #495057;
+    padding: 12px 20px;
+    border-left: 4px solid transparent;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+.sidebar a:hover {
+    background-color: #f1f8ff;
+    border-left: 4px solid #0046ad;
+    color: #0046ad;
+}
+
+/* --- MAIN CONTENT: push right by sidebar width --- */
+.main-content {
+    flex: 1;
+    margin-left: 220px; /* same as .sidebar width */
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+/* --- FOOTER pinned to bottom (optional) --- */
+footer {
+    text-align: center;
+    padding: 15px;
+    background-color: #fff;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: 0px -2px 5px rgba(0,0,0,0.05);
+    font-size: 0.9em;
+    z-index: 9999;
+    color: #6c757d;
+}
+
+footer a {
+    color: #0046ad;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* --- CONTENT BOXES/FORMS/TABLES WITHIN .main-content --- */
+.content-container,
+.form-container,
+.login-container {
+    background: #fff;
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    border-radius: 4px;
+}
+
+/* Responsive styles for small screens */
+@media (max-width: 768px) {
+    /* Top bar adjustments */
+    .top-bar {
+        height: auto;
+        padding: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .top-bar-left {
+        margin-bottom: 10px;
+    }
+    
+    .top-bar-left .tracker-title {
+        font-size: 1.2rem;
+    }
+    
+    .top-bar-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .top-bar-right a {
+        margin-left: 0;
+        margin-right: 15px;
+        line-height: normal;
+        padding: 8px 0;
+    }
+    
+    /* Adjust container to account for taller top bar */
+    .container {
+        margin-top: 100px;
+        flex-direction: column;
+    }
+    
+    /* Make sidebar horizontal for mobile */
+    .sidebar {
+        position: relative;
+        top: 0;
+        width: 100%;
+        height: auto;
+        padding: 10px;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .sidebar ul {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    
+    .sidebar li {
+        display: inline-block;
+        margin: 0 5px;
+    }
+    
+    .sidebar a {
+        padding: 8px 15px;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .sidebar a:hover {
+        border-left: none;
+        border-bottom: 3px solid #0046ad;
+    }
+    
+    /* Adjust main content */
+    .main-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+    
+    /* Make tables responsive */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    /* Adjust form containers */
+    .content-container,
+    .form-container,
+    .login-container {
+        padding: 15px;
+        margin: 10px auto;
+    }
+    
+    /* Adjust footer */
+    footer {
+        position: relative;
+        padding: 10px;
+    }
+}
+<<<<<<< HEAD
+<<<<<<< HEAD
+    overflow: hidden;
+=======
+
+/* Responsive improvements for medium screens */
+@media (max-width: 768px) {
+    /* Improve table responsiveness */
+    table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        -ms-overflow-style: -ms-autohiding-scrollbar; /* Hide scrollbar in IE */
+        border-radius: 4px;
+    }
+    
+    /* Add horizontal scroll indicator */
+    .table-responsive {
+        position: relative;
+    }
+    
+    .table-responsive::after {
+        content: "→ Scroll for more →";
+        position: absolute;
+        bottom: -20px;
+        right: 0;
+        font-size: 0.8rem;
+        color: #6c757d;
+        opacity: 0.7;
+    }
+    
+    /* Adjust column widths for better mobile viewing */
+    th, td {
+        min-width: 120px;
+        white-space: nowrap;
+    }
+    
+    /* Make the title column wider */
+    th:first-child, td:first-child {
+        min-width: 200px;
+    }
+    
+    /* Adjust the filter forms */
+    form {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    /* Adjust the filter form elements */
+    form > div {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    
+    /* Make the download buttons stack on small screens */
+    div[style*="display: flex; gap: 10px"] {
+        flex-direction: column;
+    }
+    
+    /* Adjust the team progress container */
+    .team-progress-container {
+        padding: 10px 30px;
+    }
+    
+    /* Make the team member cards smaller */
+    .team-member-card {
+        flex: 0 0 180px;
+    }
+}
+
+/* Additional responsive improvements for very small screens */
+@media (max-width: 480px) {
+    /* Make tables even more mobile-friendly */
+    table {
+        font-size: 0.9rem;
+    }
+    
+    th, td {
+        padding: 6px !important;
+        min-width: 100px;
+    }
+    
+    /* Adjust form elements */
+    input, select, textarea {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Adjust buttons */
+    button {
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    /* Adjust headings */
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+    }
+    
+    /* Ensure content doesn't overflow */
+    .main-content {
+        padding: 10px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    /* Make sure images don't overflow */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Adjust the top bar for very small screens */
+        .top-bar {
+            padding: 0 10px;
+            height: auto;
+            min-height: 70px;
+        }
+        
+        .top-bar-left {
+            margin-right: 10px;
+        }
+        
+        .top-bar-left .tracker-title {
+            font-size: 1.1rem;
+        }
+        
+        .top-bar-right {
+            padding: 5px 0;
+        }
+        
+        .top-bar-right .welcome-text {
+            display: none;
+        }
+        
+        .top-bar-right a {
+            margin: 2px;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+        }
+    
+    /* Hide some less important columns on very small screens */
+    th:nth-child(3), td:nth-child(3),
+    th:nth-child(5), td:nth-child(5) {
+        display: none;
+    }
+>>>>>>> 6b472e0 (Update MBO Tracker application)
+=======
+    overflow: hidden;
+>>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+}
+th, td {
+    border: 1px solid #e9ecef;
+    padding: 12px 15px;
+    text-align: left;
+}
+th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+tr:hover {
+    background-color: #f1f8ff;
+}
+
+/* Form & button styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 20px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #0046ad;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 70, 173, 0.1);
+}
+
+label {
+    font-weight: 500;
+    color: #495057;
+    display: block;
+    margin-bottom: 5px;
+}
+
+button, .btn {
+    background: #0046ad;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+button:hover, .btn:hover {
+    background: #003380;
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: #0046ad;
+}
+.btn-primary:hover {
+    background-color: #003380;
+}
+
+.btn-success {
+    background-color: #28a745;
+}
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+}
+.btn-info:hover {
+    background-color: #138496;
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 12px;
+}
+
+/* Green button style for My Profile & Logout */
+.btn-green {
+    background-color: #28a745;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    margin-left: 15px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.btn-green:hover {
+    background-color: #218838;
+}
+
+.welcome-text {
+    margin-right: 15px;
+    font-size: 0.95rem;
+    color: #fff;
+    line-height: 70px;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: #212529;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 2.25rem;
+    margin-bottom: 1.5rem;
+    color: #0046ad;
+}
+
+/* Add user button */
+.btn-add-user {
+    display: inline-flex;
+    align-items: center;
+    background-color: #0046ad;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: background 0.2s;
+}
+
+.btn-add-user:hover {
+    background-color: #003380;
+}
+
+.btn-add-user img {
+    margin-right: 8px;
+}
+
+/* Flash messages */
+.flash-message {
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.flash-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.flash-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.flash-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}

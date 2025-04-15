@@ -1,0 +1,42 @@
+{% extends "auth_layout.html" %}
+
+{% block content %}
+<div class="login-container">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <img src="{{ url_for('static', filename='img/snaplogic-logo-blue.png') }}" alt="SnapLogic Logo" style="height: 60px; margin-bottom: 20px;">
+        <h1 style="color: #0046ad; font-weight: 500; margin-top: 0;">Solutions Engineer MBO Tracker</h1>
+        <p style="color: #6c757d; font-size: 1.1rem; margin-top: 10px;">Sign in to access your MBO dashboard</p>
+    </div>
+    
+    <form method="POST" action="{{ url_for('login') }}" style="max-width: 400px; margin: 0 auto;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div style="margin-bottom: 20px;">
+            <label for="email" style="display: block; margin-bottom: 8px; font-weight: 500; color: #495057;">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="your.email@snaplogic.com" required 
+                   style="width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px;">
+        </div>
+        
+        <div style="margin-bottom: 25px;">
+            <label for="password" style="display: block; margin-bottom: 8px; font-weight: 500; color: #495057;">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required
+                   style="width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px;">
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="{{ url_for('forgot_password') }}" style="color: #0046ad; text-decoration: none; font-size: 14px;">
+                Forgot Password?
+            </a>
+        </div>
+        
+        <button type="submit" style="width: 100%; background-color: #0046ad; color: white; border: none; padding: 14px;
+                                    border-radius: 4px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background-color 0.2s;">
+            Sign In
+        </button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 30px; color: #6c757d; font-size: 0.9rem;">
+        <p>If you're having trouble logging in, please contact your manager.</p>
+    </div>
+</div>
+{% endblock %}

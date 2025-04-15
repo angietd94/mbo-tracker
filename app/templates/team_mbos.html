@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Team MBOs</h1>
+
+<!-- FILTER FORM -->
+<form method="GET" action="{{ url_for('team_mbos') }}" style="margin-bottom: 1rem;">
+  <label for="year">Year:</label>
+  <select name="year" id="year">
+    <option value="">All Years</option>
+    {% for y in range(2020, 2041) %}
+      <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>{{ y }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="quarter">Quarter:</label>
+  <select name="quarter" id="quarter">
+    <option value="">All Quarters</option>
+    <option value="1" {% if current_quarter == 1 %}selected{% endif %}>Q1</option>
+    <option value="2" {% if current_quarter == 2 %}selected{% endif %}>Q2</option>
+    <option value="3" {% if current_quarter == 3 %}selected{% endif %}>Q3</option>
+    <option value="4" {% if current_quarter == 4 %}selected{% endif %}>Q4</option>
+  </select>
+
+  <label for="type">Type:</label>
+  <select name="type" id="type">
+    <option value="">All Types</option>
+    <option value="Learning and Certification" {% if mbo_type == 'Learning and Certification' %}selected{% endif %}>Learning and Certification</option>
+    <option value="Demo &amp; Assets" {% if mbo_type == 'Demo & Assets' %}selected{% endif %}>Demo &amp; Assets</option>
+    <option value="Impact Outside of Pod" {% if mbo_type == 'Impact Outside of Pod' %}selected{% endif %}>Impact Outside of Pod</option>
+  </select>
+
+  <label for="region">Region:</label>
+  <select name="region" id="region">
+    {% for region_option in regions %}
+      <option value="{{ region_option }}" {% if region_option == selected_region %}selected{% endif %}>
+        {{ region_option }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <label for="employee_id">Employee:</label>
+  <select name="employee_id" id="employee_id">
+    <option value="">All Employees</option>
+    {% for emp in employees %}
+      <option value="{{ emp.id }}" {% if emp.id|string == selected_employee %}selected{% endif %}>
+        {{ emp.first_name }} {{ emp.last_name }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <button type="submit">Filter</button>
+  <button type="button" onclick="window.location='{{ url_for('team_mbos') }}'">Remove Filters</button>
+</form>
+
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+<!-- RESULTS TABLE -->
+{% if mbos and mbos|length > 0 %}
+<div style="overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
+    <thead>
+      <tr style="background-color: #f8f9fa; border-bottom: 2px solid #0046ad;">
+        <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad;">Title</th>
+        <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad;">Engineer</th>
+        <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad;">Type</th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">Progress</th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">Points</th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">Created</th>
+<<<<<<< HEAD
+=======
+<!-- Download buttons -->
+<div style="display: flex; gap: 10px; margin: 20px 0;">
+  <a href="{{ url_for('download_team_mbos_report', format='excel') }}" style="background-color: #28a745; color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px; display: flex; align-items: center; font-size: 14px;">
+    <span style="margin-right: 5px;">📊</span> Download Excel Report
+  </a>
+  <a href="{{ url_for('download_team_mbos_report', format='csv') }}" style="background-color: #17a2b8; color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px; display: flex; align-items: center; font-size: 14px;">
+    <span style="margin-right: 5px;">📄</span> Download CSV Report
+  </a>
+</div>
+
+<!-- RESULTS TABLE -->
+{% if mbos and mbos|length > 0 %}
+<div class="table-responsive" style="overflow-x: auto; position: relative;">
+  <table style="width: 100%; border-collapse: collapse; border: 1px solid #0046ad;">
+    <thead>
+      <tr style="background-color: #f8f9fa; border-bottom: 2px solid #0046ad;">
+        <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad;">
+          <a href="{{ url_for('team_mbos', sort='title', dir='asc' if sort_by == 'title' and sort_dir == 'desc' else 'desc', year=request.args.get('year'), quarter=request.args.get('quarter'), type=request.args.get('type'), employee_id=request.args.get('employee_id'), search=request.args.get('search'), region=request.args.get('region')) }}" style="color: #0046ad; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">
+            Title
+            {% if sort_by == 'title' %}
+              <span>{{ '▲' if sort_dir == 'asc' else '▼' }}</span>
+            {% endif %}
+          </a>
+        </th>
+        <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad;">
+          <a href="{{ url_for('team_mbos', sort='engineer', dir='asc' if sort_by == 'engineer' and sort_dir == 'desc' else 'desc', year=request.args.get('year'), quarter=request.args.get('quarter'), type=request.args.get('type'), employee_id=request.args.get('employee_id'), search=request.args.get('search'), region=request.args.get('region')) }}" style="color: #0046ad; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">
+            Engineer
+            {% if sort_by == 'engineer' %}
+              <span>{{ '▲' if sort_dir == 'asc' else '▼' }}</span>
+            {% endif %}
+          </a>
+        </th>
+        <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad;">
+          <a href="{{ url_for('team_mbos', sort='type', dir='asc' if sort_by == 'type' and sort_dir == 'desc' else 'desc', year=request.args.get('year'), quarter=request.args.get('quarter'), type=request.args.get('type'), employee_id=request.args.get('employee_id'), search=request.args.get('search'), region=request.args.get('region')) }}" style="color: #0046ad; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">
+            Type
+            {% if sort_by == 'type' %}
+              <span>{{ '▲' if sort_dir == 'asc' else '▼' }}</span>
+            {% endif %}
+          </a>
+        </th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">
+          <a href="{{ url_for('team_mbos', sort='progress', dir='asc' if sort_by == 'progress' and sort_dir == 'desc' else 'desc', year=request.args.get('year'), quarter=request.args.get('quarter'), type=request.args.get('type'), employee_id=request.args.get('employee_id'), search=request.args.get('search'), region=request.args.get('region')) }}" style="color: #0046ad; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+            Progress
+            {% if sort_by == 'progress' %}
+              <span style="margin-left: 5px;">{{ '▲' if sort_dir == 'asc' else '▼' }}</span>
+            {% endif %}
+          </a>
+        </th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">
+          <a href="{{ url_for('team_mbos', sort='points', dir='asc' if sort_by == 'points' and sort_dir == 'desc' else 'desc', year=request.args.get('year'), quarter=request.args.get('quarter'), type=request.args.get('type'), employee_id=request.args.get('employee_id'), search=request.args.get('search'), region=request.args.get('region')) }}" style="color: #0046ad; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+            Points
+            {% if sort_by == 'points' %}
+              <span style="margin-left: 5px;">{{ '▲' if sort_dir == 'asc' else '▼' }}</span>
+            {% endif %}
+          </a>
+        </th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">
+          <a href="{{ url_for('team_mbos', sort='created_at', dir='asc' if sort_by == 'created_at' and sort_dir == 'desc' else 'desc', year=request.args.get('year'), quarter=request.args.get('quarter'), type=request.args.get('type'), employee_id=request.args.get('employee_id'), search=request.args.get('search'), region=request.args.get('region')) }}" style="color: #0046ad; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+            Date
+            {% if sort_by == 'created_at' %}
+              <span style="margin-left: 5px;">{{ '▲' if sort_dir == 'asc' else '▼' }}</span>
+            {% endif %}
+          </a>
+        </th>
+>>>>>>> 6b472e0 (Update MBO Tracker application)
+=======
+>>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+      </tr>
+    </thead>
+  <tbody>
+  {% for mbo in mbos %}
+    {% set bg_color = '#d4edda' if mbo.progress_status == 'Finished' else '#d1ecf1' if mbo.progress_status == 'MVP' else '#fff3cd' if mbo.progress_status == 'In Progress' else '#ffffff' %}
+    <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">
+      <td style="padding: 10px; border: 1px solid #dee2e6;"><a href="{{ url_for('mbo_details', mbo_id=mbo.id) }}" style="color: #0046ad; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
+      <td style="padding: 10px; border: 1px solid #dee2e6;">{{ mbo.creator.first_name }} {{ mbo.creator.last_name }}</td>
+      <td style="padding: 10px; border: 1px solid #dee2e6;">{{ mbo.mbo_type }}</td>
+      <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.progress_status }}</td>
+      <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6; font-weight: bold;">{{ mbo.points|default(0) }}</td>
+      <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.created_at.strftime('%Y-%m-%d') if mbo.created_at else 'N/A' }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="alert" style="background-color: #f8f9fa; border-left: 4px solid #0046ad; padding: 15px; margin: 20px 0; border-radius: 4px;">
+  <p style="margin: 0; color: #495057;">No MBOs found with the selected filters.</p>
+</div>
+{% endif %}
+{% endblock %}
