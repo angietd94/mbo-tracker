@@ -389,17 +389,12 @@ app/
 ```
 
 ## 🔒 Security Best Practices
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
 
 1. **Environment Variables**: All sensitive information is stored in environment variables, not in the code.
 2. **Password Security**: Passwords are hashed using Werkzeug's security functions.
 3. **CSRF Protection**: All forms are protected against Cross-Site Request Forgery.
 4. **Secure Headers**: HTTP security headers are set using Flask-Talisman.
 5. **Audit Logging**: Security events are logged for auditing purposes.
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 ## License
 
@@ -428,10 +423,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - SnapLogic for supporting the development of this tool
 - The Flask team for their excellent web framework
 - All contributors who have helped improve this application
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
+
 
 ## License
 
 [MIT License](LICENSE)
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
