@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
 # MBO Management Application
 
 A Flask-based application for managing Management by Objectives (MBOs).
