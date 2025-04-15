@@ -1,6 +1,13 @@
 # MBO Management Application
 
-A Flask-based application for managing Management by Objectives (MBOs).
+MBOs (Management by Objectives) are a way to set clear, measurable goals that help align personal growth with team and company priorities.
+For Solutions Engineers at SnapLogic, MBOs provide structure, visibility, and accountability around learning, contributions, and impact. 
+This project was created to centralize and simplify how we propose, track, and approve MBOs across the team. 
+It allows engineers to easily submit their objectives, get feedback from managers, and track their progress in one place. 
+Managers can quickly approve or reject MBOs, assign points, and ensure balanced contributions across different focus areas.
+The dashboard also fosters transparency by highlighting top contributors and team performance. 
+We wanted a simple but effective tool tailored to our workflow. By tracking MBOs quarterly, we ensure continuous improvement and celebrate meaningful achievements. Ultimately, this tool supports a stronger, more engaged SE community. :)
+
 
 ## Security Features
 
