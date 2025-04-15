@@ -32,7 +32,7 @@ A Flask-based application for managing Management by Objectives (MBOs).
   <p>A comprehensive platform for tracking, managing, and reporting on Management by Objectives (MBOs)</p>
 </div>
 
-![Dashboard Screenshot](https://via.placeholder.com/1200x600?text=MBO+Dashboard+Screenshot)
+![Dashboard Screenshot](dashboard-image.png)
 
 ## 📋 Overview
 
@@ -193,17 +193,12 @@ erDiagram
    ```
 
 2. **Create a virtual environment**
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+
 3. Install dependencies:
    ```bash
    pip install -r requirements.txt
@@ -234,17 +229,12 @@ erDiagram
    ```
 
 5. **Initialize the database**
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+
    ```bash
    flask db upgrade
    ```
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
+
 ### 3. Create Admin User
 
 ```bash
@@ -296,8 +286,7 @@ app/
 ```
 
 ## Security Best Practices
-<<<<<<< HEAD
-=======
+
 6. **Create admin user**
    ```bash
    flask init-admin
@@ -335,7 +324,7 @@ app/
 ## 📱 Application Screenshots
 
 ### Dashboard
-![Dashboard](https://via.placeholder.com/800x400?text=Dashboard+View)
+![Dashboard Screenshot](dashboard-image.png)
 
 ### MBO Creation
 ![MBO Creation](https://via.placeholder.com/800x400?text=MBO+Creation+Form)
