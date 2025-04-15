@@ -420,8 +420,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgements
 
 - SnapLogic for supporting the development of this tool
-- The Flask team for their excellent web framework
-- All contributors who have helped improve this application
+- The ROO AI tool for its excellent job as an AI assistent!
+- My manager for letting me do this project
+- Me as a contributor who have helped create this application
 
 
 ## License
