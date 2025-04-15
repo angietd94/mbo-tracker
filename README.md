@@ -23,7 +23,6 @@ A Flask-based application for managing Management by Objectives (MBOs).
 
 1. Clone the repository
 2. Create a virtual environment:
-<<<<<<< HEAD
 =======
 # SnapLogic MBO Tracker
 
