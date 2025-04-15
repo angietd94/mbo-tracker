@@ -422,6 +422,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Me as a contributor who have helped create this application
 
 
-## License
-
-[MIT License](LICENSE)
