@@ -214,8 +214,7 @@ erDiagram
 1. Create a PostgreSQL database
 2. Update the `DATABASE_URL` in your `.env` file
 3. Initialize the database:
-<<<<<<< HEAD
-=======
+
 
 3. **Install dependencies**
    ```bash
