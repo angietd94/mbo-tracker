@@ -25,14 +25,12 @@
 - Python 3.9+
 - PostgreSQL
 
-## Setup Instructions
+### Environment Setup
 
-### 1. Environment Setup
+![MBO Diagram ](mbotrackerdiagram.png)
 
-1. Clone the repository
-2. Create a virtual environment:
 
-# SnapLogic MBO Tracker
+# Setup instructions
 
 <div align="center">
   <img src="app/static/img/snaplogic_logo.png" alt="SnapLogic Logo" width="300"/>
