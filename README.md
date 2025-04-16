@@ -1,5 +1,12 @@
 # MBO Management Application
 
+
+IMPORTANT NOTE:
+THIS IS A 1 MAN (WOMAN) PROJECT AND HERE THE CODE IS NOT THE MOST UPDATED!!!
+
+I WILL DO IT SOON WHEN I CAN! <3
+
+
 - MBOs (Management by Objectives) are a way to set clear, measurable goals that help align personal growth with team and company priorities.
 - For Solutions Engineers at SnapLogic, MBOs provide structure, visibility, and accountability around learning, contributions, and impact. 
 - This project was created to centralize and simplify how we propose, track, and approve MBOs across the team. 
