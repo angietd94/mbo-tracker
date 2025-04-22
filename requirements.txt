@@ -12,10 +12,4 @@ Werkzeug<3.0
 python-dotenv
 flask-talisman
 boto3
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 xlsxwriter
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842

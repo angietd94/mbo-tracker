@@ -1,12 +1,5 @@
 # MBO Management Application
 
-
-IMPORTANT NOTE:
-THIS IS A 1 MAN (WOMAN) PROJECT AND HERE THE CODE IS NOT THE MOST UPDATED!!!
-
-I WILL DO IT SOON WHEN I CAN! <3
-
-
 - MBOs (Management by Objectives) are a way to set clear, measurable goals that help align personal growth with team and company priorities.
 - For Solutions Engineers at SnapLogic, MBOs provide structure, visibility, and accountability around learning, contributions, and impact. 
 - This project was created to centralize and simplify how we propose, track, and approve MBOs across the team. 
@@ -32,12 +25,14 @@ I WILL DO IT SOON WHEN I CAN! <3
 - Python 3.9+
 - PostgreSQL
 
-### Environment Setup
+## Setup Instructions
 
-![MBO Diagram ](mbotrackerdiagram.png)
+### 1. Environment Setup
 
+1. Clone the repository
+2. Create a virtual environment:
 
-# Setup instructions
+# SnapLogic MBO Tracker
 
 <div align="center">
   <img src="app/static/img/snaplogic_logo.png" alt="SnapLogic Logo" width="300"/>

@@ -37,23 +37,8 @@ def send_new_mbo_notification(mbo, manager):
     """
     # Check if manager has email notifications enabled
     try:
-<<<<<<< HEAD
-<<<<<<< HEAD
         if not manager.get_email_notifications():
             return False
-=======
-        # Check if manager has email notifications enabled
-        from app.models import UserSettings
-        with app.app_context():
-            setting = UserSettings.query.filter_by(user_id=manager.id, key='email_notifications').first()
-            
-            if setting and setting.value.lower() == 'false':
-                return False
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
-        if not manager.get_email_notifications():
-            return False
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
     except:
         # If there's an error checking email notifications, assume they're enabled
         pass
@@ -183,23 +168,8 @@ def send_mbo_status_notification(mbo, action, actor):
     """
     # Check if creator has email notifications enabled
     try:
-<<<<<<< HEAD
-<<<<<<< HEAD
         if not mbo.creator.get_email_notifications():
             return False
-=======
-        # Check if creator has email notifications enabled
-        from app.models import UserSettings
-        with app.app_context():
-            setting = UserSettings.query.filter_by(user_id=mbo.creator.id, key='email_notifications').first()
-            
-            if setting and setting.value.lower() == 'false':
-                return False
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
-        if not mbo.creator.get_email_notifications():
-            return False
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
     except:
         # If there's an error checking email notifications, assume they're enabled
         pass

@@ -28,7 +28,7 @@
       </th>
       <th>
         <a href="{{ url_for('historical_team_mbos', order_by='created_at', direction='asc' if order_by != 'created_at' or direction == 'desc' else 'desc') }}">
-          Created At
+          Date
         </a>
       </th>
       <th>Progress</th>
@@ -37,7 +37,7 @@
   <tbody>
     {% for mbo in team_mbos %}
     <tr>
-      <td><a href="{{ url_for('mbo_details', mbo_id=mbo.id) }}">{{ mbo.title }}</a></td>
+      <td><a href="{{ url_for('mbo_details', mbo_id=mbo.id) }}" style="color: #000000; text-decoration: none;">{{ mbo.title }}</a></td>
       <td>
         {% if mbo.mbo_type == "Learning and Certification" %}
           <img src="{{ url_for('static', filename='img/learning.png') }}" alt="Learning" style="height:24px; vertical-align:middle;">

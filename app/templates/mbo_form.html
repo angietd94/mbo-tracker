@@ -4,7 +4,7 @@
 
 <div style="display: flex; flex-wrap: wrap; gap: 30px;">
   <div style="flex: 1; min-width: 300px;">
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <!-- Title -->
       <label for="title">Title:</label>
@@ -27,12 +27,16 @@
       <label for="optional_link">Optional Link:</label>
       <input type="url" name="optional_link" value="{{ mbo.optional_link if mbo else '' }}">
       
-      <!-- Creation Date -->
+      <!-- Creation Date - Only visible when editing -->
+      {% if mbo %}
       <label for="created_at">Creation Date:</label>
       <input type="date" id="created_at" name="created_at" value="{{ mbo.created_at.strftime('%Y-%m-%d') if mbo and mbo.created_at else '' }}">
       <p style="color: #6c757d; font-size: 0.9em; margin-top: 5px;">
         You can change the creation date to move this MBO to a different quarter.
       </p>
+      {% endif %}
+
+      <!-- Attachments are no longer supported -->
     
       <!-- Points (Manager Only) -->
       {% if current_user.role == 'Manager' %}
@@ -43,11 +47,9 @@
       <!-- Progress Status -->
       <label for="progress_status">Progress Status:</label>
       <select name="progress_status" required>
-        {% set status = mbo.progress_status if mbo else 'New' %}
-        <option value="New" {% if status == 'New' %}selected{% endif %}>New</option>
-        <option value="In Progress" {% if status == 'In Progress' %}selected{% endif %}>In Progress</option>
-        <option value="MVP" {% if status == 'MVP' %}selected{% endif %}>MVP</option>
-        <option value="Finished" {% if status == 'Finished' %}selected{% endif %}>Finished</option>
+        {% set status = mbo.progress_status if mbo else 'In progress' %}
+        <option value="In progress" {% if status == 'In progress' or status == 'New' or status == 'In Progress' %}selected{% endif %}>In progress</option>
+        <option value="Finished" {% if status == 'Completed' or status == 'Finished' or status == 'MVP' %}selected{% endif %}>Completed</option>
       </select>
     
       <!-- Approval Status (Manager Only) -->
@@ -72,8 +74,18 @@
       <img src="{{ url_for('static', filename='img/guidelines.png') }}" alt="MBO Guidelines" style="max-width: 100%; height: auto; max-height: 400px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
     </div>
     
+    <!-- MBO Type Limits -->
+    <div style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+      <strong>MBO Type Limits:</strong>
+      <ul style="margin-top: 10px; margin-bottom: 0;">
+        <li>Learning and Certification: Goal 4 (max 6)</li>
+        <li>Demo & Assets: Goal 2 (max 4)</li>
+        <li>Impact Outside of Pod: Goal 4 (max 8)</li>
+      </ul>
+    </div>
+    
     <!-- Instructional Note -->
-    <div style="background-color: #cff4fc; color: #055160; padding: 15px; border-radius: 4px; margin-top: 20px;">
+    <div style="background-color: #cff4fc; color: #055160; padding: 15px; border-radius: 4px;">
       <strong>Note:</strong> The link for <em>'Impact Outside of Pod'</em> should be the Salesforce account or opportunity reference.
     </div>
   </div>

@@ -22,13 +22,6 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    overflow-x: hidden;
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
     z-index: 9999;
     box-sizing: border-box;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -55,13 +48,6 @@ body {
     display: flex;
     align-items: center;
     height: 100%;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    flex-wrap: wrap;
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
 }
 .top-bar-right a {
     color: #fff;
@@ -160,7 +146,7 @@ footer a:hover {
     background: #fff;
     padding: 30px;
     margin: 20px auto;
-    max-width: 800px;
+    max-width: 100%;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
 }
@@ -171,6 +157,51 @@ table {
     border-collapse: collapse;
     margin-bottom: 30px;
     border-radius: 4px;
+}
+
+/* Table styling */
+.table {
+    table-layout: fixed;
+}
+.table th, .table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* Specific column widths for users table */
+.table th:nth-child(1), .table td:nth-child(1) { width: 8%; } /* Profile */
+.table th:nth-child(2), .table td:nth-child(2) { width: 12%; } /* First Name */
+.table th:nth-child(3), .table td:nth-child(3) { width: 12%; } /* Last Name */
+.table th:nth-child(4), .table td:nth-child(4) { width: 20%; } /* Email */
+.table th:nth-child(5), .table td:nth-child(5) { width: 10%; } /* Role */
+.table th:nth-child(6), .table td:nth-child(6) { width: 10%; } /* Region */
+.table th:nth-child(7), .table td:nth-child(7) { width: 15%; } /* Manager */
+.table th:nth-child(8), .table td:nth-child(8) { width: 13%; } /* Actions */
+
+
+/* Profile Picture Styling */
+.profile-picture {
+    border-radius: 50%;
+    width: 101px;
+    height: 101px;
+    object-fit: cover;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: white;   /* Fills transparent areas */
+    position: relative;        /* Needed for z-index to take effect */
+    z-index: 3;                /* Ensure it appears on top of fallback */
+}
+
+/* Custom background colors for MBO progress */
+.bg-finished {
+    background-color: #28a745;
+}
+
+.bg-mvp {
+    background-color: #d1ecf1;
+}
+
+.bg-in-progress {
+    background-color: #fff3cd;
 }
 
 /* Responsive styles for small screens */
@@ -244,9 +275,16 @@ table {
     }
     
     /* Adjust main content */
-    .main-content {
-        margin-left: 0;
-        padding: 15px;
+    .main-content .profile-page {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0;
+    padding: 20px;
+}.main-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        padding: 30px; /* Adjust as needed */
     }
     
     /* Make tables responsive */
@@ -254,6 +292,12 @@ table {
         display: block;
         overflow-x: auto;
         white-space: nowrap;
+    }
+    
+    /* Reset fixed column widths on mobile for better scrolling */
+    .table th, .table td {
+        width: auto !important;
+        min-width: 100px; /* Ensure columns don't get too narrow */
     }
     
     /* Adjust form containers */
@@ -269,163 +313,17 @@ table {
         position: relative;
         padding: 10px;
     }
-}
-<<<<<<< HEAD
-<<<<<<< HEAD
-    overflow: hidden;
-=======
-
-/* Responsive improvements for medium screens */
-@media (max-width: 768px) {
-    /* Improve table responsiveness */
-    table {
-        display: block;
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        -ms-overflow-style: -ms-autohiding-scrollbar; /* Hide scrollbar in IE */
-        border-radius: 4px;
-    }
     
-    /* Add horizontal scroll indicator */
-    .table-responsive {
+    /* Adjust footer */
+    footer {
         position: relative;
-    }
-    
-    .table-responsive::after {
-        content: "→ Scroll for more →";
-        position: absolute;
-        bottom: -20px;
-        right: 0;
-        font-size: 0.8rem;
-        color: #6c757d;
-        opacity: 0.7;
-    }
-    
-    /* Adjust column widths for better mobile viewing */
-    th, td {
-        min-width: 120px;
-        white-space: nowrap;
-    }
-    
-    /* Make the title column wider */
-    th:first-child, td:first-child {
-        min-width: 200px;
-    }
-    
-    /* Adjust the filter forms */
-    form {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    /* Adjust the filter form elements */
-    form > div {
-        margin-bottom: 10px;
-        width: 100%;
-    }
-    
-    /* Make the download buttons stack on small screens */
-    div[style*="display: flex; gap: 10px"] {
-        flex-direction: column;
-    }
-    
-    /* Adjust the team progress container */
-    .team-progress-container {
-        padding: 10px 30px;
-    }
-    
-    /* Make the team member cards smaller */
-    .team-member-card {
-        flex: 0 0 180px;
+        padding: 10px;
     }
 }
 
-/* Additional responsive improvements for very small screens */
-@media (max-width: 480px) {
-    /* Make tables even more mobile-friendly */
-    table {
-        font-size: 0.9rem;
-    }
-    
-    th, td {
-        padding: 6px !important;
-        min-width: 100px;
-    }
-    
-    /* Adjust form elements */
-    input, select, textarea {
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-    }
-    
-    /* Adjust buttons */
-    button {
-        width: 100%;
-        margin: 5px 0;
-    }
-    
-    /* Adjust headings */
-    h1 {
-        font-size: 1.5rem;
-    }
-    
-    h2 {
-        font-size: 1.3rem;
-    }
-    
-    /* Ensure content doesn't overflow */
-    .main-content {
-        padding: 10px;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-    }
-    
-    /* Make sure images don't overflow */
-    img {
-        max-width: 100%;
-        height: auto;
-    }
-    
-    /* Adjust the top bar for very small screens */
-        .top-bar {
-            padding: 0 10px;
-            height: auto;
-            min-height: 70px;
-        }
-        
-        .top-bar-left {
-            margin-right: 10px;
-        }
-        
-        .top-bar-left .tracker-title {
-            font-size: 1.1rem;
-        }
-        
-        .top-bar-right {
-            padding: 5px 0;
-        }
-        
-        .top-bar-right .welcome-text {
-            display: none;
-        }
-        
-        .top-bar-right a {
-            margin: 2px;
-            padding: 5px 10px;
-            font-size: 0.9rem;
-        }
-    
-    /* Hide some less important columns on very small screens */
-    th:nth-child(3), td:nth-child(3),
-    th:nth-child(5), td:nth-child(5) {
-        display: none;
-    }
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
+/* Table cell styling */
+table {
     overflow: hidden;
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
 }
 th, td {
     border: 1px solid #e9ecef;
@@ -472,6 +370,7 @@ label {
     color: #495057;
     display: block;
     margin-bottom: 5px;
+    line-height: 38px; /* match select and button height */
 }
 
 button, .btn {
@@ -499,55 +398,126 @@ button:hover, .btn:hover {
 .btn-primary:hover {
     background-color: #003380;
 }
-
 .btn-success {
     background-color: #28a745;
 }
 .btn-success:hover {
     background-color: #218838;
 }
-
 .btn-danger {
     background-color: #dc3545;
 }
 .btn-danger:hover {
     background-color: #c82333;
 }
-
+.btn-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+.btn-warning:hover {
+    background-color: #e0a800;
+}
 .btn-info {
     background-color: #17a2b8;
 }
 .btn-info:hover {
     background-color: #138496;
 }
-
 .btn-sm {
-    padding: 8px 16px;
+    padding: 5px 10px;
     font-size: 12px;
 }
-
-/* Green button style for My Profile & Logout */
-.btn-green {
-    background-color: #28a745;
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 4px;
-    margin-left: 15px;
-    text-decoration: none;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    transition: background 0.2s;
+.btn-lg {
+    padding: 15px 30px;
+    font-size: 16px;
+}
+.btn-block {
+    display: block;
+    width: 100%;
 }
 
+/* Flash messages */
+.flash-message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border-left: 4px solid;
+}
+.flash-success {
+    background-color: #d4edda;
+    border-left-color: #28a745;
+    color: #155724;
+}
+.flash-danger, .flash-error {
+    background-color: #f8d7da;
+    border-left-color: #dc3545;
+    color: #721c24;
+}
+.flash-warning {
+    background-color: #fff3cd;
+    border-left-color: #ffc107;
+    color: #856404;
+}
+.flash-info {
+    background-color: #d1ecf1;
+    border-left-color: #17a2b8;
+    color: #0c5460;
+}
+
+/* Login page specific */
+.login-container {
+    max-width: 400px;
+    margin: 80px auto;
+}
+.login-container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #0046ad;
+}
+.login-container .logo-container {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.login-container .logo-container img {
+    height: 60px;
+}
+
+/* Custom button styles */
+.btn-add-user {
+    display: inline-flex;
+    align-items: center;
+    background-color: #0046ad;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-bottom: 20px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-add-user:hover {
+    background-color: #003380;
+}
+.btn-add-user img {
+    margin-right: 8px;
+}
+
+/* Green button style */
+.btn-green {
+    background-color: #28a745;
+    color: white;
+    padding: 0px 13px;  /* 4px on top/bottom, 15px left/right */
+    border-radius: 2px;
+    font-weight: 500;
+}
 .btn-green:hover {
     background-color: #218838;
 }
 
+/* Welcome text in top bar */
 .welcome-text {
     margin-right: 15px;
-    font-size: 0.95rem;
-    color: #fff;
-    line-height: 70px;
+    font-weight: 500;
 }
 
 /* Headings */
@@ -558,56 +528,23 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
     line-height: 1.2;
 }
-
 h1 {
-    font-size: 2.25rem;
-    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
     color: #0046ad;
+    margin-bottom: 1.5rem;
 }
-
-/* Add user button */
-.btn-add-user {
-    display: inline-flex;
-    align-items: center;
-    background-color: #0046ad;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 4px;
-    text-decoration: none;
-    margin-bottom: 20px;
-    transition: background 0.2s;
+h2 {
+    font-size: 2rem;
 }
-
-.btn-add-user:hover {
-    background-color: #003380;
+h3 {
+    font-size: 1.75rem;
 }
-
-.btn-add-user img {
-    margin-right: 8px;
+h4 {
+    font-size: 1.5rem;
 }
-
-/* Flash messages */
-.flash-message {
-    padding: 12px 20px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-    font-weight: 500;
+h5 {
+    font-size: 1.25rem;
 }
-
-.flash-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.flash-error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-.flash-info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
+h6 {
+    font-size: 1rem;
 }

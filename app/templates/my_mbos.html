@@ -7,7 +7,7 @@
 <form method="GET" action="{{ url_for('my_mbos') }}" class="mbos-filter-form">
     <div style="display: flex; align-items: center; background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
         <div style="display: flex; align-items: center; margin-right: 15px;">
-            <label for="year" style="margin-right: 8px; font-weight: 500; white-space: nowrap;">Year:</label>
+            <label for="year" style="margin-right: 8px; font-weight: 500; white-space: nowrap; margin-top: -8px;">Year:</label>
             <select name="year" id="year" style="padding: 8px; border-radius: 4px; border: 1px solid #ced4da; height: 38px;">
                 {% for y in range(2025, 2041) %}
                     <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>{{ y }}</option>
@@ -16,7 +16,7 @@
         </div>
         
         <div style="display: flex; align-items: center; margin-right: 15px;">
-            <label for="quarter" style="margin-right: 8px; font-weight: 500; white-space: nowrap;">Quarter:</label>
+            <label for="quarter" style="margin-right: 8px; font-weight: 500; white-space: nowrap; margin-top: -8px;">Quarter:</label>
             <select name="quarter" id="quarter" style="padding: 8px; border-radius: 4px; border: 1px solid #ced4da; height: 38px;">
                 {% for q in [1, 2, 3, 4] %}
                     <option value="{{ q }}" {% if q == current_quarter %}selected{% endif %}>Q{{ q }}</option>
@@ -24,7 +24,7 @@
             </select>
         </div>
         
-        <button type="submit" style="background-color: #0046ad; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 500; height: 38px;">Apply Filter</button>
+        <button type="submit" style="background-color: #0046ad; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 500; height: 38px; margin-top: -12px;">Apply Filter</button>
     </div>
 </form>
 
@@ -32,23 +32,8 @@
 <div style="margin-bottom: 40px;">
     <h2 style="color: #0046ad; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-bottom: 20px;">Pending MBOs</h2>
     {% if pending_mbos %}
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
-            <thead>
-                <tr style="background-color: #f8f9fa; border-bottom: 2px solid #0046ad;">
-                    <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad;">Title</th>
-                    <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad;">Type</th>
-                    <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">Status</th>
-                    <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">Link</th>
-                    <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">Created</th>
-<<<<<<< HEAD
-=======
-    <div class="table-responsive" style="overflow-x: auto; position: relative;">
-        <table style="width: 100%; border-collapse: collapse; border: 1px solid #0046ad;">
             <thead>
                 <tr style="background-color: #f8f9fa; border-bottom: 2px solid #0046ad;">
                     <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad;">
@@ -78,15 +63,12 @@
                     <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">Link</th>
                     <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">
                         <a href="{{ url_for('my_mbos', sort='created_at', dir='asc' if sort_by == 'created_at' and sort_dir == 'desc' else 'desc', year=current_year, quarter=current_quarter) }}" style="color: #0046ad; text-decoration: none; display: flex; align-items: center; justify-content: center;">
-                            Date
-                            {% if sort_by == 'created_at' %}
-                                <span style="margin-left: 5px;">{{ '▲' if sort_dir == 'asc' else '▼' }}</span>
-                            {% endif %}
-                        </a>
+                        Date
+                        {% if sort_by == 'created_at' %}
+                            <span style="margin-left: 5px;">{{ '▲' if sort_dir == 'asc' else '▼' }}</span>
+                        {% endif %}
+                    </a>
                     </th>
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
                     <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad;">Actions</th>
                 </tr>
             </thead>
@@ -94,15 +76,18 @@
             {% for mbo in pending_mbos %}
                 {% set bg_color = '#fff3cd' %}
                 <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; border: 1px solid #dee2e6;"><a href="{{ url_for('edit_mbo', mbo_id=mbo.id) }}" style="color: #0046ad; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6;"><a href="{{ url_for('edit_mbo', mbo_id=mbo.id) }}" style="color: #000000; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
                     <td style="padding: 10px; border: 1px solid #dee2e6;">{{ mbo.mbo_type or 'N/A' }}</td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.progress_status or 'N/A' }}</td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">
                         {% if mbo.optional_link %}
-                            <a href="{{ mbo.optional_link }}" target="_blank" style="color: #0046ad; text-decoration: none;">View</a>
+                            <a href="{{ mbo.optional_link }}" target="_blank" style="color: #000000; text-decoration: none;">View</a>
                         {% else %}
                             --
                         {% endif %}
+                    </td>
+                    <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">
+                        {{ mbo.created_at.strftime('%Y-%m-%d') }}
                     </td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.created_at.strftime('%Y-%m-%d') }}</td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">
@@ -127,18 +112,8 @@
 <div style="margin-bottom: 40px;">
     <h2 style="color: #28a745; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-bottom: 20px;">Approved MBOs</h2>
     {% if approved_mbos %}
-<<<<<<< HEAD
-<<<<<<< HEAD
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
-=======
-    <div class="table-responsive" style="overflow-x: auto; position: relative;">
-        <table style="width: 100%; border-collapse: collapse; border: 1px solid #0046ad;">
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
             <thead>
                 <tr style="background-color: #f8f9fa; border-bottom: 2px solid #28a745;">
                     <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #28a745;">Title</th>
@@ -146,25 +121,35 @@
                     <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #28a745;">Status</th>
                     <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #28a745;">Link</th>
                     <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #28a745;">Points</th>
-                    <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #28a745;">Created</th>
+                    <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #28a745;">Date</th>
+                    <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #28a745;">Actions</th>
                 </tr>
             </thead>
             <tbody>
             {% for mbo in approved_mbos %}
-                {% set bg_color = '#d4edda' if mbo.progress_status == 'Finished' else '#d1ecf1' if mbo.progress_status == 'MVP' else '#fff3cd' if mbo.progress_status == 'In Progress' else '#ffffff' %}
+                {% set bg_color = '#28a745' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#ffffff' %}
                 <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; border: 1px solid #dee2e6;"><a href="{{ url_for('edit_mbo', mbo_id=mbo.id) }}" style="color: #28a745; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6;"><a href="{{ url_for('edit_mbo', mbo_id=mbo.id) }}" style="color: #000000; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
                     <td style="padding: 10px; border: 1px solid #dee2e6;">{{ mbo.mbo_type or 'N/A' }}</td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.progress_status or 'N/A' }}</td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">
                         {% if mbo.optional_link %}
-                            <a href="{{ mbo.optional_link }}" target="_blank" style="color: #28a745; text-decoration: none;">View</a>
+                            <a href="{{ mbo.optional_link }}" target="_blank" style="color: #000000; text-decoration: none;">View</a>
                         {% else %}
                             --
                         {% endif %}
                     </td>
+                    <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">
+                        {{ mbo.points if mbo.points else '--' }}
+                    </td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6; font-weight: bold;">{{ mbo.points }}</td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">
+                    <form action="{{ url_for('delete_mbo', mbo_id=mbo.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this MBO?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer;">🗑 Delete</button>
+                    </form>
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -181,40 +166,33 @@
 <div style="margin-bottom: 40px;">
     <h2 style="color: #dc3545; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-bottom: 20px;">Rejected MBOs</h2>
     {% if rejected_mbos %}
-<<<<<<< HEAD
-<<<<<<< HEAD
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
-=======
-    <div class="table-responsive" style="overflow-x: auto; position: relative;">
-        <table style="width: 100%; border-collapse: collapse; border: 1px solid #0046ad;">
->>>>>>> 6b472e0 (Update MBO Tracker application)
-=======
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
->>>>>>> a6a29bae4bb6e51517b81b41b9cdf7b89a26a842
             <thead>
                 <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dc3545;">
                     <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #dc3545;">Title</th>
                     <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #dc3545;">Type</th>
                     <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #dc3545;">Status</th>
                     <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #dc3545;">Link</th>
-                    <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #dc3545;">Created</th>
+                    <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #dc3545;">Date</th>
                     <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #dc3545;">Actions</th>
                 </tr>
             </thead>
             <tbody>
             {% for mbo in rejected_mbos %}
                 <tr style="background-color: #f8d7da; border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; border: 1px solid #dee2e6;"><a href="{{ url_for('edit_mbo', mbo_id=mbo.id) }}" style="color: #dc3545; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6;"><a href="{{ url_for('edit_mbo', mbo_id=mbo.id) }}" style="color: #000000; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
                     <td style="padding: 10px; border: 1px solid #dee2e6;">{{ mbo.mbo_type or 'N/A' }}</td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.progress_status or 'N/A' }}</td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">
                         {% if mbo.optional_link %}
-                            <a href="{{ mbo.optional_link }}" target="_blank">View</a>
+                            <a href="{{ mbo.optional_link }}" target="_blank" style="color: #000000; text-decoration: none;">View</a>
                         {% else %}
                             --
                         {% endif %}
+                    </td>
+                    <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">
+                        {{ mbo.created_at.strftime('%Y-%m-%d') }}
                     </td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.created_at.strftime('%Y-%m-%d') }}</td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">

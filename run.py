@@ -49,6 +49,14 @@ if __name__ == '__main__':
     if app.config.get('DEBUG', False):
         with app.app_context():
             create_default_admin()
+
+    # Configure app with AWS credentials from environment variables
+    app.config['AWS_ACCESS_KEY_ID'] = os.environ.get('AWS_ACCESS_KEY_ID')
+    app.config['AWS_SECRET_ACCESS_KEY'] = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    app.config['AWS_REGION'] = os.environ.get('AWS_REGION')
+    app.config['S3_BUCKET'] = os.environ.get('S3_BUCKET')
+    app.config['AWS_SECRET_ACCESS_KEY'] = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    app.config['AWS_REGION'] = os.environ.get('AWS_REGION')
     
     # Use the default port 5000
     app.run(host='0.0.0.0', debug=True)

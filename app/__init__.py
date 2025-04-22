@@ -19,17 +19,27 @@ except ImportError:
     print("python-dotenv not installed. Using environment variables from system.")
 
 # Import config
-from config import Config
+from config import config
 
 # Initialize Flask app
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(config.get(os.getenv('FLASK_ENV', 'default')))
+print(f"SQLALCHEMY_DATABASE_URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
 
 # Initialize extensions
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+login_manager.session_protection = 'strong'
+login_manager.refresh_view = 'login'
+login_manager.needs_refresh_message = 'Please login again to confirm your identity'
+
+# Enhance session security
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'  # Secure in production
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # Session timeout in seconds (1 hour)
+app.config['SESSION_USE_SIGNER'] = True  # Sign the session cookie
 mail = Mail(app)
 csrf = CSRFProtect(app)
 
@@ -39,7 +49,7 @@ try:
     csp = {
         'default-src': "'self'",
         'img-src': ["'self'", 'data:'],
-        'script-src': ["'self'"],
+        'script-src': ["'self'", "'unsafe-inline'"],
         'style-src': ["'self'", "'unsafe-inline'"],
     }
     # In development, set force_https=False
@@ -49,5 +59,8 @@ try:
 except ImportError:
     print("flask-talisman not installed. Secure headers not enabled.")
 
-# Import routes and models
-from app import routes, models
+# Import models
+from app import models
+
+# Import routes package
+from app.routes import *

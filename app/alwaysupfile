@@ -1,0 +1,15 @@
+[Unit]
+Description=Gunicorn Flask Application
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/mbo-latest
+ExecStart=/usr/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 myapp:app
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

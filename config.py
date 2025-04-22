@@ -16,28 +16,38 @@ class Config:
     if not SECRET_KEY:
         SECRET_KEY = 'default-dev-key-replace-in-production'
         print("WARNING: Using default SECRET_KEY. Set it in .env file or environment variables.")
+
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_REGION = os.environ.get('AWS_REGION', 'eu-west-3').split('#')[0].strip()
     
-    # SQLAlchemy - Always set a default
-    # Direct PostgreSQL connection with correct password
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@database-mbo-project-solutions-engineers.cluster-cnpur7nyk8zh.eu-west-3.rds.amazonaws.com/postgres'
+    # SQLAlchemy - Use environment variables for sensitive connection info
+    DB_USER = os.environ.get('DB_USER', 'postgres')
+    DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
+    DB_HOST = os.environ.get('DB_HOST', 'localhost')
+    DB_NAME = os.environ.get('DB_NAME', 'postgres')
+    
+    # Construct the database URI from environment variables
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # Mail
+    # Mail - Use environment variables for sensitive info
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.example.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() in ['true', 'yes', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
     
-    # Admin user
+    # Admin user - Use environment variables for sensitive info
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
-    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'Admin@Secure123!')
-
+    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'change-me-in-production')
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
+    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'docx', 'doc', 'gif'}
+    S3_BUCKET = os.environ.get('S3_BUCKET', 'mbo-solutions-engineer-data')
 class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
-    # Use the same PostgreSQL connection
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@database-mbo-project-solutions-engineers.cluster-cnpur7nyk8zh.eu-west-3.rds.amazonaws.com/postgres'
+    # Uses the base SQLALCHEMY_DATABASE_URI from Config
 
 class TestingConfig(Config):
     """Testing configuration."""
@@ -48,8 +58,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     """Production configuration."""
     DEBUG = False
-    # Use the same PostgreSQL connection
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@database-mbo-project-solutions-engineers.cluster-cnpur7nyk8zh.eu-west-3.rds.amazonaws.com/postgres'
+    # Uses the base SQLALCHEMY_DATABASE_URI from Config
 
 # Configuration dictionary
 config = {

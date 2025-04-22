@@ -8,13 +8,23 @@
     <div style="flex: 0 0 250px;">
         <div style="text-align: center; margin-bottom: 20px;">
             <h3>Profile Picture</h3>
-            {% if user.profile_picture and user.profile_picture != 'default.jpg' %}
-                <img src="{{ user.profile_picture }}" alt="Profile Picture" style="width: 200px; height: 200px; object-fit: cover; border-radius: 50%; border: 3px solid #0046ad; margin-bottom: 15px;">
-            {% else %}
-                <div style="width: 200px; height: 200px; border-radius: 50%; background-color: #0046ad; color: white; display: flex; align-items: center; justify-content: center; font-size: 72px; font-weight: bold; margin: 0 auto 15px;">
-                    {{ user.first_name[0] }}{{ user.last_name[0] }}
-                </div>
-            {% endif %}
+            <div style="position: relative; width: 200px; height: 200px; margin: 0 auto 15px;">
+                <!-- Fallback with initials -->
+                {% if user.profile_picture and user.profile_picture != 'default.jpg' %}
+                    <div id="profile-fallback" style="width: 100%; height: 100%; border-radius: 50%; background-color: #0046ad; color: white; display: none; align-items: center; justify-content: center; font-size: 72px; font-weight: bold; position: absolute; top: 0; left: 0; z-index: 1;">
+                        {{ user.first_name[0] }}{{ user.last_name[0] }}
+                    </div>
+                {% else %}
+                    <div id="profile-fallback" style="width: 100%; height: 100%; border-radius: 50%; background-color: #0046ad; color: white; display: flex; align-items: center; justify-content: center; font-size: 72px; font-weight: bold; position: absolute; top: 0; left: 0; z-index: 1;">
+                        {{ user.first_name[0] }}{{ user.last_name[0] }}
+                    </div>
+                {% endif %}
+                
+                <!-- Actual profile image -->
+                {% if user.profile_picture and user.profile_picture != 'default.jpg' %}
+                    <img src="{{ user.get_profile_picture_url() }}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid #0046ad; position: absolute; top: 0; left: 0; z-index: 2; background-color: white;">
+                {% endif %}
+            </div>
             
             <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_profile_picture') }}" id="profile-picture-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -30,9 +40,17 @@
                     <img id="image-preview" src="#" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 50%; border: 2px dashed #0046ad;">
                 </div>
                 
-                <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+                <!-- Submit button removed as we're using the custom upload button -->
+                
+                <button type="button" id="upload-button" style="background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
                     Upload Picture
                 </button>
+                
+                {% if user.profile_picture and user.profile_picture != 'default.jpg' %}
+                <button type="button" id="remove-button" style="background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;" onclick="removeProfilePicture()">
+                    Remove Picture
+                </button>
+                {% endif %}
             </form>
             
             <script>
@@ -46,6 +64,33 @@
                         }
                         
                         reader.readAsDataURL(input.files[0]);
+                    }
+                }
+                
+                // Handle the upload button click
+                document.getElementById('upload-button').addEventListener('click', function() {
+                    // Submit the form
+                    document.getElementById('profile-picture-form').submit();
+                });
+                
+                // Handle the remove button click
+                function removeProfilePicture() {
+                    if (confirm('Are you sure you want to remove your profile picture?')) {
+                        // Create a form dynamically
+                        var form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = "{{ url_for('remove_profile_picture') }}";
+                        
+                        // Add CSRF token
+                        var csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = 'csrf_token';
+                        csrfInput.value = "{{ csrf_token() }}";
+                        form.appendChild(csrfInput);
+                        
+                        // Append form to body and submit
+                        document.body.appendChild(form);
+                        form.submit();
                     }
                 }
             </script>
@@ -106,13 +151,8 @@
                 </select>
             </div>
 
-            <div>
-                <label for="quarter_compensation">Quarterly Compensation (only visible to you):</label>
-                <input type="number" id="quarter_compensation" name="quarter_compensation" value="{{ user.quarter_compensation or '' }}" step="0.01" placeholder="Enter your quarterly compensation amount">
-                <p style="color: #6c757d; font-size: 0.9em; margin-top: 5px;">
-                    This information is private and only visible to you. It will be used for compensation calculations.
-                </p>
-            </div>
+            
+    
 
             <div>
                 <label for="password">Change Password:</label>
