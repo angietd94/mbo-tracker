@@ -40,7 +40,7 @@
   <p>A comprehensive platform for tracking, managing, and reporting on Management by Objectives (MBOs)</p>
 </div>
 
-![Dashboard Screenshot](dashboard-image.png)
+![Dashboard Screenshot](/images/dashboard-image.png)
 
 ## 📋 Overview
 
