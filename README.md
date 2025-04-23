@@ -407,9 +407,9 @@ app/
 8. **Session Management**: Secure session handling with Flask-Login.
 
 
-## 🤝 Contributing
+## 🤝 Contributing?
 
-Contributions is _not_ welcome, sorry...! This is an internal project :)
+Contributions are _not_ welcome, sorry...! This is an internal project :)
 
 ## 🙏 Acknowledgements
 
