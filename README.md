@@ -331,13 +331,13 @@ app/
 ## 📱 Application Screenshots
 
 ### Dashboard
-![Dashboard Screenshot](dashboard-image.png)
+![Dashboard Screenshot](/images/dashboard-image.png)
 
 ### MBO Creation
-![MBO Creation](https://via.placeholder.com/800x400?text=MBO+Creation+Form)
+![MBO Creation](/images/my_mbos.png)
 
 ### Team Progress
-![Team Progress](https://via.placeholder.com/800x400?text=Team+Progress+View)
+![Team Progress](/images/team_mbo.png)
 
 ### Mobile View
 ![Mobile View](https://via.placeholder.com/400x800?text=Mobile+Responsive+View)
