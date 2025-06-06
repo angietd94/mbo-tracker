@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Team MBOs</h1>
+
+
+<div style="display: flex; gap: 10px; margin-top: 15px; margin-bottom: 15px; margin-left: auto; justify-content: flex-end;">
+  <a href="{{ url_for('download_team_mbos_excel', year=current_year, quarter=current_quarter, type=mbo_type, region=selected_region, employee_id=selected_employee) }}" style="background-color: #28a745; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; display: flex; align-items: center;">
+    <span style="margin-right: 5px;">📊</span> Download Excel
+  </a>
+  <a href="{{ url_for('download_team_mbos_excel', year=current_year, quarter=current_quarter, type=mbo_type, region=selected_region, employee_id=selected_employee) }}" style="background-color: #17a2b8; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; display: flex; align-items: center;">
+    <span style="margin-right: 5px;">📄</span> Download Excel
+  </a>
+</div>
+
+<!-- FILTER FORM -->
+<form method="GET" action="{{ url_for('team_mbos') }}" style="margin-bottom: 1rem;">
+  <label for="year">Year:</label>
+  <select name="year" id="year">
+    <option value="">All Years</option>
+    {% for y in range(2020, 2041) %}
+      <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>{{ y }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="quarter">Quarter:</label>
+  <select name="quarter" id="quarter">
+    <option value="">All Quarters</option>
+    <option value="1" {% if current_quarter == 1 %}selected{% endif %}>Q1</option>
+    <option value="2" {% if current_quarter == 2 %}selected{% endif %}>Q2</option>
+    <option value="3" {% if current_quarter == 3 %}selected{% endif %}>Q3</option>
+    <option value="4" {% if current_quarter == 4 %}selected{% endif %}>Q4</option>
+  </select>
+
+  <label for="type">Type:</label>
+  <select name="type" id="type">
+    <option value="">All Types</option>
+    <option value="Learning and Certification" {% if mbo_type == 'Learning and Certification' %}selected{% endif %}>Learning and Certification</option>
+    <option value="Demo &amp; Assets" {% if mbo_type == 'Demo & Assets' %}selected{% endif %}>Demo &amp; Assets</option>
+    <option value="Impact Outside of Pod" {% if mbo_type == 'Impact Outside of Pod' %}selected{% endif %}>Impact Outside of Pod</option>
+  </select>
+
+  <label for="region">Region:</label>
+  <select name="region" id="region">
+    {% for region_option in regions %}
+      <option value="{{ region_option }}" {% if region_option == selected_region %}selected{% endif %}>
+        {{ region_option }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <label for="employee_id">Employee:</label>
+  <select name="employee_id" id="employee_id">
+    <option value="">All Employees</option>
+    {% for emp in employees %}
+      <option value="{{ emp.id }}" {% if emp.id|string == selected_employee %}selected{% endif %}>
+        {{ emp.first_name }} {{ emp.last_name }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <button type="submit">Filter</button>
+  <button type="button" onclick="window.location='{{ url_for('team_mbos') }}'">Remove Filters</button>
+</form>
+
+
+
+<!-- RESULTS TABLE -->
+{% if mbos and mbos|length > 0 %}
+<div style="overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
+    <thead>
+      <tr style="background-color: #f8f9fa; border-bottom: 2px solid #0046ad;">
+        <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('team_mbos', sort='title', dir='asc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">Title ↑</a>
+          <a href="{{ url_for('team_mbos', sort='title', dir='desc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('team_mbos', sort='engineer', dir='asc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">Engineer ↑</a>
+          <a href="{{ url_for('team_mbos', sort='engineer', dir='desc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6; width: 15%;">
+          <a href="{{ url_for('team_mbos', sort='type', dir='asc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">Type ↑</a>
+          <a href="{{ url_for('team_mbos', sort='type', dir='desc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; width: 15%;">
+          <a href="{{ url_for('team_mbos', sort='progress', dir='asc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">Progress ↑</a>
+          <a href="{{ url_for('team_mbos', sort='progress', dir='desc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; width: 10%;">
+          <a href="{{ url_for('team_mbos', sort='points', dir='asc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">Points ↑</a>
+          <a href="{{ url_for('team_mbos', sort='points', dir='desc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; width: 10%;">
+          <a href="{{ url_for('team_mbos', sort='created', dir='asc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">Date ↑</a>
+          <a href="{{ url_for('team_mbos', sort='created', dir='desc', year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; width: 10%;">Quarter</th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; width: 10%;">Year</th>
+        <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; width: 10%;">Actions</th>
+      </tr>
+    </thead>
+  <tbody>
+  {% for mbo in mbos %}
+    {% set bg_color = '#28a745' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#ffffff' %}
+    {% set quarter = ((mbo.created_at.month - 2) // 3) + 1 if mbo.created_at else 'N/A' %}
+    {% set year = mbo.created_at.year if mbo.created_at else 'N/A' %}
+    <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">
+      <td style="padding: 10px; border: 1px solid #dee2e6;"><a href="{{ url_for('mbo_details', mbo_id=mbo.id) }}" style="color: #000000; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
+      <td style="padding: 10px; border: 1px solid #dee2e6;">{{ mbo.creator.first_name }} {{ mbo.creator.last_name }}</td>
+      <td style="padding: 10px; border: 1px solid #dee2e6;">{{ mbo.mbo_type }}</td>
+      <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.progress_status }}</td>
+      <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6; font-weight: bold;">{{ mbo.points|default(0) }}</td>
+      <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.created_at.strftime('%Y-%m-%d') if mbo.created_at else 'N/A' }}</td>
+      <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">Q{{ quarter }}</td>
+      <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">{{ year }}</td>
+      <td style="padding: 10px; text-align: center; border: 1px solid #dee2e6;">
+        {% if current_user.role == 'Manager' %}
+        <a href="{{ url_for('edit_mbo', mbo_id=mbo.id) }}" style="background: none; border: none; color: #0046ad; cursor: pointer; text-decoration: none; margin-right: 10px;">✏️ Edit</a>
+        <form action="{{ url_for('delete_mbo', mbo_id=mbo.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this MBO?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer;">🗑 Delete</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<!-- Pagination - Load More Button -->
+{% if has_more %}
+<div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+  <a href="{{ url_for('team_mbos', page=page+1, sort=sort_by, dir=sort_dir, year=current_year, quarter=current_quarter, type=selected_type, region=selected_region, employee_id=selected_employee) }}"
+     style="background-color: #0046ad; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; display: inline-block;">
+    Load More Results
+  </a>
+</div>
+{% endif %}
+
+{% else %}
+<div class="alert" style="background-color: #f8f9fa; border-left: 4px solid #0046ad; padding: 15px; margin: 20px 0; border-radius: 4px;">
+  <p style="margin: 0; color: #495057;">No MBOs found with the selected filters.</p>
+</div>
+{% endif %}
+{% endblock %}
+

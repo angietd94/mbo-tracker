@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Edit MBO</h1>
+
+<form method="POST" action="{{ url_for('edit_mbo', mbo_id=mbo.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <!-- Title -->
+    <label for="title">Title:</label>
+    <input type="text" name="title" value="{{ mbo.title }}" required>
+
+    <!-- Description -->
+    <label for="description">Description:</label>
+    <textarea name="description" required>{{ mbo.description }}</textarea>
+
+    <!-- Type -->
+    <!-- Type (REQUIRED) -->
+    <select name="mbo_type" id="mbo_type" required>
+        <option value="" disabled {% if not mbo.mbo_type %}selected{% endif %}>-- Select Type --</option>
+        <option value="Learning and Certification" {% if mbo.mbo_type == 'Learning and Certification' %}selected{% endif %}>Learning and Certification</option>
+        <option value="Demo & Assets" {% if mbo.mbo_type == 'Demo & Assets' %}selected{% endif %}>Demo & Assets</option>
+        <option value="Impact Outside of Pod" {% if mbo.mbo_type == 'Impact Outside of Pod' %}selected{% endif %}>Impact Outside of Pod</option>
+      </select>
+      
+      
+
+    <!-- Optional Link -->
+    <label for="optional_link">Optional Link:</label>
+    <input type="url" name="optional_link" value="{{ mbo.optional_link }}">
+
+    <!-- Progress Status -->
+    <label for="progress_status">Progress Status:</label>
+    <select name="progress_status" required>
+        <option value="New" {% if mbo.progress_status == 'New' %}selected{% endif %}>New</option>
+        <option value="In Progress" {% if mbo.progress_status == 'In Progress' %}selected{% endif %}>In Progress</option>
+        <option value="MVP" {% if mbo.progress_status == 'MVP' %}selected{% endif %}>MVP</option>
+        <option value="Finished" {% if mbo.progress_status == 'Finished' %}selected{% endif %}>Finished</option>
+    </select><br><br>
+
+    {% if current_user.role == 'Manager' %}
+        <!-- Approval Status -->
+        <label for="approval_status">Approval Status:</label><br>
+        <select name="approval_status" required>
+            <option value="Pending Approval" {% if mbo.approval_status == 'Pending Approval' %}selected{% endif %}>Pending Approval</option>
+            <option value="Approved" {% if mbo.approval_status == 'Approved' %}selected{% endif %}>Approved</option>
+            <option value="Rejected" {% if mbo.approval_status == 'Rejected' %}selected{% endif %}>Rejected</option>
+        </select><br><br>
+
+        <!-- Points Input -->
+        <label for="points">Points:</label><br>
+        <input type="number" name="points" value="{{ mbo.points if mbo.points is not none else 0 }}" min="0" required>
+    {% else %}
+        <!-- Hidden Approval Status & Points for non-managers -->
+        <input type="hidden" name="approval_status" value="{{ mbo.approval_status or 'Pending Approval' }}">
+        <input type="hidden" name="points" value="{{ mbo.points or 0 }}">
+    {% endif %}
+
+    <!-- Created At (Only editable by managers) -->
+    <label for="created_at">Creation Date (YYYY-MM-DD):</label><br>
+    <input type="date" name="created_at" value="{{ mbo.created_at.strftime('%Y-%m-%d') }}"><br><br>
+
+
+    <button type="submit">Save Changes</button>
+</form>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Pending MBOs</h1>
+
+<div class="info-box" style="background-color: #e7f5ff; border-left: 4px solid #0046ad; padding: 15px; margin-bottom: 25px; border-radius: 4px;">
+  <h3 style="margin-top: 0; color: #0046ad;">MBO Points Guide</h3>
+  <p style="margin-bottom: 5px;">• Standard MBO: 10 points for 100% completion</p>
+  <p style="margin-bottom: 5px;">• Exceptional Achievement: Up to 15 points (150%)</p>
+  <p style="margin-bottom: 0;">• Points are awarded quarterly and contribute to the engineer's performance evaluation</p>
+</div>
+
+{% if mbos %}
+<div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6; min-width: 800px;">
+        <thead>
+            <tr style="background-color: #f8f9fa; border-bottom: 2px solid #0046ad;">
+                <th onclick="sortTable(0)" style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad; width: 25%;">Title</th>
+                <th onclick="sortTable(1)" style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad; width: 10%;">Type</th>
+                <th onclick="sortTable(2)" style="padding: 12px; text-align: left; border: 1px solid #dee2e6; color: #0046ad; width: 15%;">Requested By</th>
+                <th onclick="sortTable(3)" style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad; width: 10%;">Status</th>
+                <th onclick="sortTable(4)" style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad; width: 10%;">Approval</th>
+                <th onclick="sortTable(5)" style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad; width: 10%;">Points</th>
+                <th style="padding: 12px; text-align: center; border: 1px solid #dee2e6; color: #0046ad; width: 20%;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mbo in mbos %}
+            <tr style="border-bottom: 1px solid #dee2e6; background-color: #fff;">
+                <td style="padding: 12px; border: 1px solid #dee2e6;"><a href="{{ url_for('mbo_details', mbo_id=mbo.id) }}" style="color: #000000; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
+                <td style="padding: 12px; border: 1px solid #dee2e6;">{{ mbo.mbo_type }}</td>
+                <td style="padding: 12px; border: 1px solid #dee2e6;">{{ mbo.creator.first_name }} {{ mbo.creator.last_name }}</td>
+                <td style="padding: 12px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.progress_status }}</td>
+                <td style="padding: 12px; text-align: center; border: 1px solid #dee2e6;">{{ mbo.approval_status }}</td>
+                <td style="padding: 12px; text-align: center; border: 1px solid #dee2e6;">
+                    <form action="{{ url_for('approve_mbo', mbo_id=mbo.id) }}" method="POST" id="approve-form-{{ mbo.id }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="title" value="{{ mbo.title }}">
+                        <input type="hidden" name="description" value="{{ mbo.description }}">
+                        <input type="hidden" name="progress_status" value="{{ mbo.progress_status }}">
+                        <input type="hidden" name="mbo_type" value="{{ mbo.mbo_type }}">
+                        <input type="hidden" name="approval_status" value="Approved">
+                        <input type="hidden" name="action" value="approve">
+                        <input type="number" name="points" value="{{ mbo.points or 0 }}" min="0" style="width: 70px; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; text-align: center;" required>
+                    </form>
+                </td>
+                <td style="padding: 12px; text-align: center; border: 1px solid #dee2e6; white-space: nowrap;">
+                    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 5px;">
+                        <button type="submit" form="approve-form-{{ mbo.id }}" style="background-color: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                            ✅ Approve
+                        </button>
+                    
+                        <form action="{{ url_for('reject_mbo', mbo_id=mbo.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to reject this MBO?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                                ❌ Reject
+                            </button>
+                        </form>
+                        
+                        <a href="{{ url_for('edit_mbo', mbo_id=mbo.id) }}" style="background-color: #0046ad; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block;">
+                            ✏️ Edit
+                        </a>
+                        
+                        <form action="{{ url_for('delete_mbo', mbo_id=mbo.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this MBO? This action cannot be undone.');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" style="background-color: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                                🗑 Delete
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+
+{% else %}
+<div style="text-align: center; padding: 40px 20px; background-color: #f8f9fa; border-radius: 8px; margin-top: 20px;">
+    <p style="font-size: 18px; color: #6c757d;">No pending MBOs found for approval.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+<script>
+function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.querySelector("table");
+    switching = true;
+    dir = "asc"; // Set the sorting direction to ascending
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+</script>

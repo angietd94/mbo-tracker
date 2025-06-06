@@ -1,0 +1,466 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-header">
+        <h1>My Profile</h1>
+    </div>
+
+    <div class="profile-card">
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <!-- Profile Picture Section -->
+            <div class="profile-picture-section">
+                <!-- Profile picture container with fallback -->
+                <div class="profile-picture-container">
+                    {% if current_user.profile_picture and current_user.profile_picture != 'default.jpg' %}
+                        <!-- Always render the image, and show it if a custom image exists -->
+                        <img src="{{ current_user.get_profile_picture_url() }}"
+                             alt="Profile Picture"
+                             id="profile-image"
+                             class="profile-picture"
+                             style="display: block;"
+                             onerror="handleImageError(this);"
+                             onload="handleImageLoad(this);">
+                        <!-- Fallback is rendered but hidden -->
+                        <div id="profile-fallback" class="profile-fallback" style="display: none;">
+                            {{ current_user.first_name[0] }}{{ current_user.last_name[0] }}
+                        </div>
+                    {% else %}
+                        <!-- Render an image element (with empty src) that is hidden -->
+                        <img src=""
+                             alt="Profile Picture"
+                             id="profile-image"
+                             class="profile-picture"
+                             style="display: none;"
+                             onerror="handleImageError(this);"
+                             onload="handleImageLoad(this);">
+                        <!-- Render the fallback (blue circle with initials) -->
+                        <div id="profile-fallback" class="profile-fallback">
+                            {{ current_user.first_name[0] }}{{ current_user.last_name[0] }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                
+                
+                <div class="profile-picture-controls">
+                    <label for="profile_picture" class="btn btn-primary">
+                        <i class="fas fa-camera"></i> Change Profile Picture
+                    </label>
+                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+                    <button type="button" id="remove_profile_picture" class="btn btn-danger" style="margin-top: 10px;">
+                        <i class="fas fa-trash"></i> Remove Picture (not working yet! )
+                    </button>
+                    <div id="file-selected"></div>
+                </div>
+                
+                <div id="image-load-status"></div>
+            </div>
+
+            <!-- Personal Information Section -->
+            <div class="profile-info-section">
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ current_user.first_name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ current_user.last_name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="position">Position</label>
+                    <input type="text" id="position" name="position" value="{{ current_user.position or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="region">Region</label>
+                    <select id="region" name="region">
+                        <option value="EMEA" {% if current_user.region == 'EMEA' %}selected{% endif %}>EMEA</option>
+                        <option value="AMER" {% if current_user.region == 'AMER' %}selected{% endif %}>AMER</option>
+                        <option value="APAC" {% if current_user.region == 'APAC' %}selected{% endif %}>APAC</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" value="{{ current_user.email }}" disabled>
+                    <p class="form-help-text">Email cannot be changed. Contact your manager if you need to update it.</p>
+                </div>
+                
+    
+                <button type="submit" class="btn btn-primary btn-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .profile-page {
+        max-width: 800px;
+        margin: 0;
+        padding: 20px;
+        justify-content: center;  /* Center items horizontally */
+    }
+    
+    .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .profile-header h1 {
+        color: #0046ad;
+        font-weight: 600;
+    }
+    
+    .profile-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        width: 1500px !important;
+        max-width: 1500px !important;
+        margin: 0 auto !important;
+    }
+        
+    .profile-card form {
+        display: flex;
+        flex-direction: column;
+
+    }
+    
+    @media (min-width: 768px) {
+        .profile-card form {
+            flex-direction: row;
+        }
+    }
+    
+    .profile-picture-section {
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #f8f9fa;
+        border-right: 1px solid #eee;
+    }
+    
+    .profile-picture-container {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        margin-bottom: 20px;
+    }
+    
+    .profile-fallback {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: #0046ad;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 70px;
+        font-weight: bold;
+        z-index: 1;
+    }
+    
+    .default-profile-picture {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        z-index: 2;
+        display: none;
+    }
+    
+    .profile-picture {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        z-index: 3;
+        border: 4px solid white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        background-color: white; /* Add white background to ensure blue doesn't show through */
+    }
+    
+    /* Hide the profile picture when it fails to load */
+    .profile-picture[style*="display: none"] + .profile-fallback {
+        display: flex !important;
+    }
+    
+    .profile-picture-controls {
+        text-align: center;
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px; /* Optional: space between the two buttons */
+    }
+
+    
+    .profile-picture-controls label {
+        cursor: pointer;
+        padding: 8px 16px;
+        border-radius: 20px;
+    }
+    
+    .profile-picture-controls input[type="file"] {
+        display: none;
+    }
+    
+    #file-selected {
+        margin-top: 10px;
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+    
+    #image-load-status {
+        margin-top: 10px;
+        font-style: italic;
+        font-size: 0.9em;
+    }
+    
+    .profile-info-section {
+        padding: 30px;
+        flex: 1;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #0046ad;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 70, 173, 0.1);
+    }
+    
+    .form-help-text {
+        color: #6c757d;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+    
+    .btn-save {
+        margin-top: 20px;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 4px;
+    }
+</style>
+
+<script>
+    function handleImageError(img) {
+    console.log("Image load error: " + img.src);
+    // Hide the image element (if it's broken)
+    img.style.display = 'none';
+    // Show the fallback (blue circle with initials)
+    var fallback = document.getElementById('profile-fallback');
+    if (fallback) {
+        fallback.style.display = 'flex';
+    }
+        // Optionally, you can hide the remove button if no valid image exists
+        document.getElementById('remove_profile_picture').style.display = 'none';
+    }
+
+    function handleImageError(img) {
+    console.log("Image failed or default detected: " + img.src);
+
+    // Hide the profile image
+    img.style.display = 'none';
+
+    // If there's a default-profile-image <img> (not used in your snippet), hide it too
+    var defaultImg = document.getElementById('default-profile-image');
+    if (defaultImg) {
+        defaultImg.style.display = 'none';
+    }
+
+    // Show the fallback
+    var fallback = document.getElementById('profile-fallback');
+    if (fallback) {
+        fallback.style.display = 'flex';
+    }
+
+        // (Optional) If you want to hide the remove button when no real picture is present:
+         document.getElementById('remove_profile_picture').style.display = 'none';
+    }
+
+
+    // Function to handle image load error.
+    function handleImageLoad(img) {
+    console.log("Image loaded: " + img.src);
+    // If the image source indicates a default image, treat it as an error.
+    if (img.src.includes('default.jpg')) {
+      handleImageError(img);
+    } else {
+      img.style.display = 'block';
+      var fallback = document.getElementById('profile-fallback');
+      if (fallback) {
+        fallback.style.display = 'none';
+      }
+    }
+    }
+
+
+    document.getElementById('profile_picture').onchange = function() {
+    if (this.files && this.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var profilePic = document.getElementById('profile-image');
+            profilePic.src = e.target.result;
+            profilePic.style.display = 'block';
+            document.getElementById('profile-fallback').style.display = 'none';
+        };
+        reader.readAsDataURL(this.files[0]);
+        
+        var fileSelected = document.getElementById('file-selected');
+        fileSelected.textContent = 'Selected: ' + this.files[0].name;
+        // ... (notification code)
+            }
+        };
+
+    // Add a form submission event to show a loading state.
+    document.querySelector('form').addEventListener('submit', function(e) {
+        var fileInput = document.getElementById('profile_picture');
+        if (fileInput.files && fileInput.files[0]) {
+            var submitBtn = document.querySelector('.btn-save');
+            submitBtn.innerHTML = 'Uploading...';
+            submitBtn.disabled = true;
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('profile_picture');
+    const profilePic = document.getElementById('profile-image');
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            profilePic.src = e.target.result;
+            profilePic.style.display = 'block';
+            // Hide the fallback (blue circle)
+            const fallback = document.getElementById('profile-fallback');
+            if (fallback) fallback.style.display = 'none';
+        };
+        reader.readAsDataURL(this.files[0]);
+        document.getElementById('file-selected').textContent = 'Selected: ' + this.files[0].name;
+        }
+        });
+        });
+
+
+    // Optionally, if you need to force refresh the image to bypass caching:
+    if (profilePic && profilePic.src) {
+      const timestamp = new Date().getTime();
+      if (profilePic.src.indexOf('?') > -1) {
+        profilePic.src = profilePic.src + '&t=' + timestamp;
+      } else {
+        profilePic.src = profilePic.src + '?t=' + timestamp;
+      }
+    }
+
+    // Attach event listener to the Remove Picture button.
+    const removeBtn = document.getElementById('remove_profile_picture');
+    removeBtn.addEventListener('click', function() {
+      if (confirm('Are you sure you want to remove your profile picture?')) {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/remove_profile_picture';
+        var csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = document.querySelector('input[name="csrf_token"]').value;
+        form.appendChild(csrfInput);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+  });
+    // Initialization when the page loads.
+    window.onload = function() {
+        console.log("Page loaded, initializing profile picture");
+        var profilePic = document.getElementById('profile-image');
+        if (profilePic.src) {
+            var timestamp = new Date().getTime();
+            if (profilePic.src.indexOf('?') > -1) {
+                profilePic.src = profilePic.src + '&t=' + timestamp;
+            } else {
+                profilePic.src = profilePic.src + '?t=' + timestamp;
+            }
+        }
+        var removeBtn = document.getElementById('remove_profile_picture');
+        // If there is no custom profile picture, trigger the error to show the fallback.
+        {% if not current_user.profile_picture or current_user.profile_picture == 'default.jpg' %}
+            handleImageError(profilePic);
+        {% else %}
+            profilePic.style.display = 'block';
+            document.getElementById('profile-fallback').style.display = 'none';
+            var defaultImg = document.getElementById('default-profile-image');
+            if (defaultImg) { defaultImg.style.display = 'none'; }
+            removeBtn.style.display = 'inline-block';
+        {% endif %}
+
+        // Attach the event listener to the Remove Picture button.
+        removeBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to remove your profile picture?')) {
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/remove_profile_picture';
+                var csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = document.querySelector('input[name="csrf_token"]').value;
+                form.appendChild(csrfInput);
+                document.body.appendChild(form);
+                form.submit();
+                // Optionally, after submission the backend should redirect to refresh the page.
+            }
+        });
+
+        // Check for flash messages indicating removal success and show the fallback.
+        var flashMessages = document.querySelectorAll('.flash-message');
+        for (var i = 0; i < flashMessages.length; i++) {
+            if (flashMessages[i].textContent.includes('Profile picture removed successfully')) {
+                profilePic.style.display = 'none';
+                var defaultImg = document.getElementById('default-profile-image');
+                if (defaultImg) { defaultImg.style.display = 'none'; }
+                document.getElementById('profile-fallback').style.display = 'flex';
+                removeBtn.style.display = 'inline-block';
+                break;
+            }
+        }
+    };
+</script>
+{% endblock %}

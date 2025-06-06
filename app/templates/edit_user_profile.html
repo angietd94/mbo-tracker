@@ -1,0 +1,181 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-header">
+        <h1>Edit User Profile</h1>
+        <p>Editing profile for {{ user.first_name }} {{ user.last_name }}</p>
+    </div>
+
+    <div class="profile-card">
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <!-- Personal Information Section -->
+            <div class="profile-info-section">
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="position">Position</label>
+                    <input type="text" id="position" name="position" value="{{ user.position or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="region">Region</label>
+                    <select id="region" name="region">
+                        <option value="EMEA" {% if user.region == 'EMEA' %}selected{% endif %}>EMEA</option>
+                        <option value="AMER" {% if user.region == 'AMER' %}selected{% endif %}>AMER</option>
+                        <option value="APAC" {% if user.region == 'APAC' %}selected{% endif %}>APAC</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role" name="role">
+                        <option value="Employee" {% if user.role == 'Employee' %}selected{% endif %}>Employee</option>
+                        <option value="Manager" {% if user.role == 'Manager' %}selected{% endif %}>Manager</option>
+                        <option value="Admin" {% if user.role == 'Admin' %}selected{% endif %}>Admin</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="manager_id">Manager</label>
+                    <select id="manager_id" name="manager_id">
+                        <option value="">-- No Manager --</option>
+                        {% for manager in managers %}
+                            {% if manager.id != user.id %}  <!-- Prevent user from being their own manager -->
+                                <option value="{{ manager.id }}" {% if user.manager_id == manager.id %}selected{% endif %}>
+                                    {{ manager.first_name }} {{ manager.last_name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quarter_compensation">Quarter Compensation</label>
+                    <input type="number" id="quarter_compensation" name="quarter_compensation" value="{{ user.quarter_compensation or '' }}" step="0.01">
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="email_notifications" name="email_notifications" {% if user.email_notifications %}checked{% endif %}>
+                    <label for="email_notifications">Email Notifications</label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="new_password">New Password (leave blank to keep current)</label>
+                    <input type="password" id="new_password" name="new_password">
+                </div>
+    
+                <button type="submit" class="btn btn-primary btn-save">Save Changes</button>
+                <a href="{{ url_for('users') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .profile-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .profile-header h1 {
+        color: #0046ad;
+        font-weight: 600;
+    }
+    
+    .profile-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .profile-info-section {
+        padding: 30px;
+        flex: 1;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+    }
+    
+    .checkbox-group label {
+        margin-bottom: 0;
+        margin-left: 10px;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    
+    .form-group input[type="checkbox"] {
+        width: auto;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #0046ad;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 70, 173, 0.1);
+    }
+    
+    .btn-save {
+        margin-top: 20px;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 4px;
+    }
+    
+    .btn-secondary {
+        margin-top: 20px;
+        margin-left: 10px;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 4px;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+    }
+</style>
+{% endblock %}

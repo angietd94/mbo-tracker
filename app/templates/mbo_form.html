@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1 style="margin-bottom: 15px;">{% if mbo %}Edit MBO{% else %}New MBO{% endif %}</h1>
+
+<div style="display: flex; flex-wrap: wrap; gap: 30px;">
+  <div style="flex: 1; min-width: 300px;">
+    <form method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <!-- Title -->
+      <label for="title">Title:</label>
+      <input type="text" name="title" value="{{ mbo.title if mbo else '' }}" required>
+    
+      <!-- Description -->
+      <label for="description">Description:</label>
+      <textarea name="description" required>{{ mbo.description if mbo else '' }}</textarea>
+    
+      <!-- Type (REQUIRED) -->
+      <label for="mbo_type">Type:</label>
+      <select name="mbo_type" id="mbo_type" required>
+        <option disabled value="" {% if not mbo or not mbo.mbo_type %}selected{% endif %}>-- Select Type --</option>
+        <option value="Learning and Certification" {% if mbo and mbo.mbo_type == 'Learning and Certification' %}selected{% endif %}>Learning and Certification</option>
+        <option value="Demo & Assets" {% if mbo and mbo.mbo_type == 'Demo & Assets' %}selected{% endif %}>Demo & Assets</option>
+        <option value="Impact Outside of Pod" {% if mbo and mbo.mbo_type == 'Impact Outside of Pod' %}selected{% endif %}>Impact Outside of Pod</option>
+      </select>
+    
+      <!-- Optional Link -->
+      <label for="optional_link">Optional Link:</label>
+      <input type="url" name="optional_link" value="{{ mbo.optional_link if mbo else '' }}">
+      
+      <!-- Creation Date - Only visible when editing -->
+      {% if mbo %}
+      <label for="created_at">Creation Date:</label>
+      <input type="date" id="created_at" name="created_at" value="{{ mbo.created_at.strftime('%Y-%m-%d') if mbo and mbo.created_at else '' }}">
+      <p style="color: #6c757d; font-size: 0.9em; margin-top: 5px;">
+        You can change the creation date to move this MBO to a different quarter.
+      </p>
+      {% endif %}
+
+      <!-- Attachments are no longer supported -->
+    
+      <!-- Points (Manager Only) -->
+      {% if current_user.role == 'Manager' %}
+        <label for="points">Points:</label>
+        <input type="number" name="points" id="points" value="{{ mbo.points if mbo else 0 }}" min="0" required>
+      {% endif %}
+    
+      <!-- Progress Status -->
+      <label for="progress_status">Progress Status:</label>
+      <select name="progress_status" required>
+        {% set status = mbo.progress_status if mbo else 'In progress' %}
+        <option value="In progress" {% if status == 'In progress' or status == 'New' or status == 'In Progress' %}selected{% endif %}>In progress</option>
+        <option value="Finished" {% if status == 'Completed' or status == 'Finished' or status == 'MVP' %}selected{% endif %}>Completed</option>
+      </select>
+    
+      <!-- Approval Status (Manager Only) -->
+      {% if current_user.role == 'Manager' %}
+        <label for="approval_status">Approval Status:</label>
+        <select name="approval_status" required>
+          {% set approval = mbo.approval_status if mbo else 'Pending Approval' %}
+          <option value="Pending Approval" {% if approval == 'Pending Approval' %}selected{% endif %}>Pending Approval</option>
+          <option value="Approved" {% if approval == 'Approved' %}selected{% endif %}>Approved</option>
+          <option value="Rejected" {% if approval == 'Rejected' %}selected{% endif %}>Rejected</option>
+        </select>
+      {% endif %}
+    
+      <button type="submit" style="margin-top: 20px;">Save</button>
+    </form>
+  </div>
+
+  <div style="flex: 1; min-width: 300px;">
+    <!-- Guidelines Image - Made smaller -->
+    <div style="margin-bottom: 20px;">
+      <h3>MBO Guidelines</h3>
+      <img src="{{ url_for('static', filename='img/guidelines.png') }}" alt="MBO Guidelines" style="max-width: 100%; height: auto; max-height: 400px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    </div>
+    
+    <!-- MBO Type Limits -->
+    <div style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+      <strong>MBO Type Limits:</strong>
+      <ul style="margin-top: 10px; margin-bottom: 0;">
+        <li>Learning and Certification: Goal 4 (max 6)</li>
+        <li>Demo & Assets: Goal 2 (max 4)</li>
+        <li>Impact Outside of Pod: Goal 4 (max 8)</li>
+      </ul>
+    </div>
+    
+    <!-- Instructional Note -->
+    <div style="background-color: #cff4fc; color: #055160; padding: 15px; border-radius: 4px;">
+      <strong>Note:</strong> The link for <em>'Impact Outside of Pod'</em> should be the Salesforce account or opportunity reference.
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,550 @@
+/* General page setup */
+body {
+    font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* --- TOP BAR --- */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;        /* Increased height for modern look */
+    background-color: #0046ad; /* Snaplogic blue */
+    color: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 9999;
+    box-sizing: border-box;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Inside top bar: left side with logo + title */
+.top-bar-left {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+.top-bar-left .logo {
+    height: 40px;
+    margin-right: 15px;
+}
+.top-bar-left .tracker-title {
+    font-size: 1.4rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Inside top bar: right side for "My Profile", etc. */
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+.top-bar-right a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 20px;
+    line-height: 70px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.top-bar-right a:hover {
+    color: #e6f0ff;
+}
+
+/* --- MAIN LAYOUT CONTAINER: offset from top bar --- */
+.container {
+    display: flex;
+    margin-top: 70px;    /* match top-bar height */
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* --- FIXED SIDEBAR ON THE LEFT --- */
+.sidebar {
+    position: fixed;
+    top: 70px;           /* place it directly below the top bar */
+    left: 0;
+    width: 220px;
+    height: calc(100% - 70px);
+    background-color: #ffffff;
+    padding: 20px 0;
+    box-sizing: border-box;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    border-right: 1px solid #e9ecef;
+}
+
+/* Sidebar list styles */
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.sidebar li {
+    margin: 5px 0;
+}
+.sidebar a {
+    display: block;
+    text-decoration: none;
+    color: #495057;
+    padding: 12px 20px;
+    border-left: 4px solid transparent;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+.sidebar a:hover {
+    background-color: #f1f8ff;
+    border-left: 4px solid #0046ad;
+    color: #0046ad;
+}
+
+/* --- MAIN CONTENT: push right by sidebar width --- */
+.main-content {
+    flex: 1;
+    margin-left: 220px; /* same as .sidebar width */
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+/* --- FOOTER pinned to bottom (optional) --- */
+footer {
+    text-align: center;
+    padding: 15px;
+    background-color: #fff;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: 0px -2px 5px rgba(0,0,0,0.05);
+    font-size: 0.9em;
+    z-index: 9999;
+    color: #6c757d;
+}
+
+footer a {
+    color: #0046ad;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* --- CONTENT BOXES/FORMS/TABLES WITHIN .main-content --- */
+.content-container,
+.form-container,
+.login-container {
+    background: #fff;
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 100%;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    border-radius: 4px;
+}
+
+/* Table styling */
+.table {
+    table-layout: fixed;
+}
+.table th, .table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* Specific column widths for users table */
+.table th:nth-child(1), .table td:nth-child(1) { width: 8%; } /* Profile */
+.table th:nth-child(2), .table td:nth-child(2) { width: 12%; } /* First Name */
+.table th:nth-child(3), .table td:nth-child(3) { width: 12%; } /* Last Name */
+.table th:nth-child(4), .table td:nth-child(4) { width: 20%; } /* Email */
+.table th:nth-child(5), .table td:nth-child(5) { width: 10%; } /* Role */
+.table th:nth-child(6), .table td:nth-child(6) { width: 10%; } /* Region */
+.table th:nth-child(7), .table td:nth-child(7) { width: 15%; } /* Manager */
+.table th:nth-child(8), .table td:nth-child(8) { width: 13%; } /* Actions */
+
+
+/* Profile Picture Styling */
+.profile-picture {
+    border-radius: 50%;
+    width: 101px;
+    height: 101px;
+    object-fit: cover;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: white;   /* Fills transparent areas */
+    position: relative;        /* Needed for z-index to take effect */
+    z-index: 3;                /* Ensure it appears on top of fallback */
+}
+
+/* Custom background colors for MBO progress */
+.bg-finished {
+    background-color: #28a745;
+}
+
+.bg-mvp {
+    background-color: #d1ecf1;
+}
+
+.bg-in-progress {
+    background-color: #fff3cd;
+}
+
+/* Responsive styles for small screens */
+@media (max-width: 768px) {
+    /* Top bar adjustments */
+    .top-bar {
+        height: auto;
+        padding: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .top-bar-left {
+        margin-bottom: 10px;
+    }
+    
+    .top-bar-left .tracker-title {
+        font-size: 1.2rem;
+    }
+    
+    .top-bar-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .top-bar-right a {
+        margin-left: 0;
+        margin-right: 15px;
+        line-height: normal;
+        padding: 8px 0;
+    }
+    
+    /* Adjust container to account for taller top bar */
+    .container {
+        margin-top: 100px;
+        flex-direction: column;
+    }
+    
+    /* Make sidebar horizontal for mobile */
+    .sidebar {
+        position: relative;
+        top: 0;
+        width: 100%;
+        height: auto;
+        padding: 10px;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .sidebar ul {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    
+    .sidebar li {
+        display: inline-block;
+        margin: 0 5px;
+    }
+    
+    .sidebar a {
+        padding: 8px 15px;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .sidebar a:hover {
+        border-left: none;
+        border-bottom: 3px solid #0046ad;
+    }
+    
+    /* Adjust main content */
+    .main-content .profile-page {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0;
+    padding: 20px;
+}.main-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        padding: 30px; /* Adjust as needed */
+    }
+    
+    /* Make tables responsive */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    /* Reset fixed column widths on mobile for better scrolling */
+    .table th, .table td {
+        width: auto !important;
+        min-width: 100px; /* Ensure columns don't get too narrow */
+    }
+    
+    /* Adjust form containers */
+    .content-container,
+    .form-container,
+    .login-container {
+        padding: 15px;
+        margin: 10px auto;
+    }
+    
+    /* Adjust footer */
+    footer {
+        position: relative;
+        padding: 10px;
+    }
+    
+    /* Adjust footer */
+    footer {
+        position: relative;
+        padding: 10px;
+    }
+}
+
+/* Table cell styling */
+table {
+    overflow: hidden;
+}
+th, td {
+    border: 1px solid #e9ecef;
+    padding: 12px 15px;
+    text-align: left;
+}
+th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+tr:hover {
+    background-color: #f1f8ff;
+}
+
+/* Form & button styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 20px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #0046ad;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 70, 173, 0.1);
+}
+
+label {
+    font-weight: 500;
+    color: #495057;
+    display: block;
+    margin-bottom: 5px;
+    line-height: 38px; /* match select and button height */
+}
+
+button, .btn {
+    background: #0046ad;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+button:hover, .btn:hover {
+    background: #003380;
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: #0046ad;
+}
+.btn-primary:hover {
+    background-color: #003380;
+}
+.btn-success {
+    background-color: #28a745;
+}
+.btn-success:hover {
+    background-color: #218838;
+}
+.btn-danger {
+    background-color: #dc3545;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+.btn-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+.btn-info {
+    background-color: #17a2b8;
+}
+.btn-info:hover {
+    background-color: #138496;
+}
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+.btn-lg {
+    padding: 15px 30px;
+    font-size: 16px;
+}
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+/* Flash messages */
+.flash-message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border-left: 4px solid;
+}
+.flash-success {
+    background-color: #d4edda;
+    border-left-color: #28a745;
+    color: #155724;
+}
+.flash-danger, .flash-error {
+    background-color: #f8d7da;
+    border-left-color: #dc3545;
+    color: #721c24;
+}
+.flash-warning {
+    background-color: #fff3cd;
+    border-left-color: #ffc107;
+    color: #856404;
+}
+.flash-info {
+    background-color: #d1ecf1;
+    border-left-color: #17a2b8;
+    color: #0c5460;
+}
+
+/* Login page specific */
+.login-container {
+    max-width: 400px;
+    margin: 80px auto;
+}
+.login-container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #0046ad;
+}
+.login-container .logo-container {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.login-container .logo-container img {
+    height: 60px;
+}
+
+/* Custom button styles */
+.btn-add-user {
+    display: inline-flex;
+    align-items: center;
+    background-color: #0046ad;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-bottom: 20px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-add-user:hover {
+    background-color: #003380;
+}
+.btn-add-user img {
+    margin-right: 8px;
+}
+
+/* Green button style */
+.btn-green {
+    background-color: #28a745;
+    color: white;
+    padding: 0px 13px;  /* 4px on top/bottom, 15px left/right */
+    border-radius: 2px;
+    font-weight: 500;
+}
+.btn-green:hover {
+    background-color: #218838;
+}
+
+/* Welcome text in top bar */
+.welcome-text {
+    margin-right: 15px;
+    font-weight: 500;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: #212529;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+h1 {
+    font-size: 2.5rem;
+    color: #0046ad;
+    margin-bottom: 1.5rem;
+}
+h2 {
+    font-size: 2rem;
+}
+h3 {
+    font-size: 1.75rem;
+}
+h4 {
+    font-size: 1.5rem;
+}
+h5 {
+    font-size: 1.25rem;
+}
+h6 {
+    font-size: 1rem;
+}

@@ -1,0 +1,630 @@
+# app/routes.py
+
+from flask import render_template, url_for, flash, redirect, request, jsonify, session, send_file
+from flask_login import login_user, current_user, logout_user, login_required
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+from sqlalchemy import func, desc, asc
+from datetime import datetime, timedelta
+import os
+import uuid
+import json
+import io
+import csv
+
+from app import app, db
+from app.models import User, MBO, UserSettings
+from app.forms import LoginForm, MBOForm, UserForm
+from app.utils.file_utils import upload_file_locally
+from app.utils.email_utils import send_new_mbo_notification, send_mbo_status_notification, send_password_reset_email
+from app.utils.security_utils import generate_reset_token, verify_reset_token
+from app.utils.report_utils import generate_csv_report, generate_excel_report, format_mbos_for_report
+
+@app.route('/')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        
+        if user and check_password_hash(user.password_hash, form.password.data):
+            login_user(user, remember=form.remember.data)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('dashboard'))
+        else:
+            flash('Login Unsuccessful. Please check email and password', 'danger')
+    
+    return render_template('login.html', title='Login', form=form)
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    now = datetime.utcnow()
+    year = now.year
+    month = now.month
+    
+    # Get region filter parameter, default to user's region
+    # Use a try/except block to handle the case where the region attribute doesn't exist
+    try:
+        default_region = current_user.region
+    except:
+        default_region = 'ALL'
+    
+    region = request.args.get('region', default_region)
+    sort_by = request.args.get('sort', 'created_at')  # Default sort by created_at
+    sort_dir = request.args.get('dir', 'desc')  # Default sort direction is descending
+
+    def get_custom_quarter_and_range(m, y):
+        if m in [2, 3, 4]:
+            return 1, datetime(y, 2, 1), datetime(y, 4, 30, 23, 59, 59)
+        elif m in [5, 6, 7]:
+            return 2, datetime(y, 5, 1), datetime(y, 7, 31, 23, 59, 59)
+        elif m in [8, 9, 10]:
+            return 3, datetime(y, 8, 1), datetime(y, 10, 31, 23, 59, 59)
+        else:
+            if m == 1:
+                return 4, datetime(y - 1, 11, 1), datetime(y, 1, 31, 23, 59, 59)
+            return 4, datetime(y, 11, 1), datetime(y + 1, 1, 31, 23, 59, 59)
+
+    quarter, start_date, end_date = get_custom_quarter_and_range(month, year)
+
+    # Base query for approved MBOs
+    mbo_query = MBO.query.filter(
+        MBO.approval_status == 'Approved',
+        MBO.mbo_type != None,
+        MBO.mbo_type != ''
+    )
+    
+    # Filter MBOs by region if a specific region is selected
+    if region != 'ALL':
+        # Get users from the selected region
+        region_user_ids = [user.id for user in User.query.filter_by(region=region).all()]
+        mbo_query = mbo_query.filter(MBO.user_id.in_(region_user_ids))
+    
+    # Apply sorting to the query
+    if sort_by == 'title':
+        mbo_query = mbo_query.order_by(MBO.title.asc() if sort_dir == 'asc' else MBO.title.desc())
+    elif sort_by == 'type':
+        mbo_query = mbo_query.order_by(MBO.mbo_type.asc() if sort_dir == 'asc' else MBO.mbo_type.desc())
+    elif sort_by == 'progress':
+        mbo_query = mbo_query.order_by(MBO.progress_status.asc() if sort_dir == 'asc' else MBO.progress_status.desc())
+    elif sort_by == 'points':
+        mbo_query = mbo_query.order_by(MBO.points.asc() if sort_dir == 'asc' else MBO.points.desc())
+    elif sort_by == 'engineer':
+        # This is more complex as we need to join with the User table
+        mbo_query = mbo_query.join(User, MBO.user_id == User.id)
+        if sort_dir == 'asc':
+            mbo_query = mbo_query.order_by(User.first_name.asc(), User.last_name.asc())
+        else:
+            mbo_query = mbo_query.order_by(User.first_name.desc(), User.last_name.desc())
+    else:  # Default to created_at
+        mbo_query = mbo_query.order_by(MBO.created_at.asc() if sort_dir == 'asc' else MBO.created_at.desc())
+    
+    # Get all MBOs after filtering and sorting
+    all_mbos = mbo_query.all()
+    
+    # Categorize MBOs by type
+    learning_mbos = [m for m in all_mbos if m.mbo_type == "Learning and Certification"]
+    demo_mbos = [m for m in all_mbos if m.mbo_type == "Demo & Assets"]
+    impact_mbos = [m for m in all_mbos if m.mbo_type == "Impact Outside of Pod"]
+
+    top_users_data = (
+    db.session.query(User, func.sum(MBO.points).label('total_points'))
+    .join(MBO, MBO.user_id == User.id)
+    .filter(MBO.created_at >= start_date, MBO.created_at <= end_date)
+    .filter(MBO.approval_status == 'Approved')
+    .group_by(User.id)
+    .all()
+    )
+
+    top_users = []
+    for user, total_points in top_users_data:
+        percentage = round((total_points / 10) * 100)
+        top_users.append((user, total_points, percentage))
+
+    # Orden descendente por porcentaje
+    top_users.sort(key=lambda x: x[2], reverse=True)
+    
+    # Get all users for the dashboard, filtered by region if specified
+    try:
+        if region == 'ALL':
+            all_users = User.query.all()
+        else:
+            all_users = User.query.filter_by(region=region).all()
+    except:
+        # If there's an error with the region filter, just get all users
+        all_users = User.query.all()
+    
+    # Get list of user IDs who already have MBOs
+    users_with_mbos = set([user.id for user, _, _ in top_users])
+    
+    # Get users without MBOs
+    users_without_mbos = [user for user in all_users if user.id not in users_with_mbos and user.email != 'admin@snaplogic.com']
+    
+    # Filter top_users by region if a specific region is selected
+    if region != 'ALL':
+        filtered_top_users = [(user, points, percentage) for user, points, percentage in top_users if user.region == region]
+    else:
+        filtered_top_users = top_users
+    
+    # Create a combined list of all users with their points (or 0 if they don't have any)
+    all_users_with_points = []
+    
+    # First add users with points (already filtered by region)
+    all_users_with_points.extend(filtered_top_users)
+    
+    # Then add users without points (already filtered by region in the query)
+    for user in users_without_mbos:
+        # Double-check region filter for users without MBOs and exclude Admin user
+        if (region == 'ALL' or user.region == region) and user.email != 'admin@snaplogic.com':
+            all_users_with_points.append((user, 0, 0))
+    
+    # Sort by percentage (descending)
+    all_users_with_points.sort(key=lambda x: x[2], reverse=True)
+    
+    # Store all MBOs in the session for report generation
+    session['filtered_mbos'] = [mbo.id for mbo in all_mbos]
+    
+    # Get regions for the filter dropdown
+    regions = ['EMEA', 'AMER', 'APAC', 'ALL']
+
+    return render_template(
+        'dashboard.html',
+        learning_mbos=learning_mbos,
+        demo_mbos=demo_mbos,
+        impact_mbos=impact_mbos,
+        current_quarter=quarter,
+        current_year=year,
+        top_users=all_users_with_points,  # Pass all users with their points
+        all_users=[],  # Empty list since we're showing all users in top_users
+        regions=regions,
+        selected_region=region,
+        sort_by=sort_by,
+        sort_dir=sort_dir
+    )
+
+@app.route('/download_dashboard_report', methods=['GET'])
+@login_required
+def download_dashboard_report():
+    """Generate and download a report of MBOs from the dashboard."""
+    format_type = request.args.get('format', 'csv')
+    
+    # Get MBO IDs from session
+    mbo_ids = session.get('filtered_mbos', [])
+    
+    # Get MBOs from database
+    mbos = MBO.query.filter(MBO.id.in_(mbo_ids)).all()
+    
+    # Format MBOs for report
+    headers, data = format_mbos_for_report(mbos)
+    
+    if format_type == 'csv':
+        return generate_csv_report(headers, data, 'dashboard_report.csv')
+    else:
+        return generate_excel_report(headers, data, 'dashboard_report.xlsx')
+
+@app.route('/my_mbos')
+@login_required
+def my_mbos():
+    # Get filter parameters
+    year = request.args.get('year', str(datetime.utcnow().year))
+    quarter = request.args.get('quarter', str(((datetime.utcnow().month - 2) // 3) + 1))
+    sort_by = request.args.get('sort', 'created_at')  # Default sort by created_at
+    sort_dir = request.args.get('dir', 'desc')  # Default sort direction is descending
+    
+    # Convert to integers
+    year = int(year) if year.isdigit() else datetime.utcnow().year
+    quarter = int(quarter) if quarter.isdigit() else ((datetime.utcnow().month - 2) // 3) + 1
+    
+    # Calculate date range for the selected quarter
+    if quarter == 1:
+        start_date = datetime(year, 2, 1)
+        end_date = datetime(year, 4, 30, 23, 59, 59)
+    elif quarter == 2:
+        start_date = datetime(year, 5, 1)
+        end_date = datetime(year, 7, 31, 23, 59, 59)
+    elif quarter == 3:
+        start_date = datetime(year, 8, 1)
+        end_date = datetime(year, 10, 31, 23, 59, 59)
+    else:  # quarter == 4
+        start_date = datetime(year, 11, 1)
+        end_date = datetime(year + 1, 1, 31, 23, 59, 59)
+    
+    # Get MBOs for the current user in the selected quarter
+    query = MBO.query.filter(
+        MBO.user_id == current_user.id,
+        MBO.created_at >= start_date,
+        MBO.created_at <= end_date
+    )
+    
+    # Apply sorting
+    if sort_by == 'title':
+        query = query.order_by(MBO.title.asc() if sort_dir == 'asc' else MBO.title.desc())
+    elif sort_by == 'type':
+        query = query.order_by(MBO.mbo_type.asc() if sort_dir == 'asc' else MBO.mbo_type.desc())
+    elif sort_by == 'progress':
+        query = query.order_by(MBO.progress_status.asc() if sort_dir == 'asc' else MBO.progress_status.desc())
+    elif sort_by == 'points':
+        query = query.order_by(MBO.points.asc() if sort_dir == 'asc' else MBO.points.desc())
+    else:  # Default to created_at
+        query = query.order_by(MBO.created_at.asc() if sort_dir == 'asc' else MBO.created_at.desc())
+    
+    mbos = query.all()
+    
+    # Separate MBOs by approval status
+    pending_mbos = [m for m in mbos if m.approval_status == 'Pending Approval']
+    approved_mbos = [m for m in mbos if m.approval_status == 'Approved']
+    rejected_mbos = [m for m in mbos if m.approval_status == 'Rejected']
+    
+    return render_template(
+        'my_mbos.html',
+        pending_mbos=pending_mbos,
+        approved_mbos=approved_mbos,
+        rejected_mbos=rejected_mbos,
+        current_year=year,
+        current_quarter=quarter,
+        sort_by=sort_by,
+        sort_dir=sort_dir
+    )
+
+@app.route('/team_mbos')
+@login_required
+def team_mbos():
+    # Get current date for default values
+    now = datetime.utcnow()
+    current_year = now.year
+    current_quarter = ((now.month - 2) // 3) + 1
+    
+    # Get filter parameters
+    raw_year = request.args.get('year', str(current_year))
+    raw_quarter = request.args.get('quarter', str(current_quarter))
+    mbo_type = request.args.get('type', '')
+    employee_id = request.args.get('employee_id', '')
+    search_term = request.args.get('search', '')
+    region = request.args.get('region', 'ALL')
+    sort_by = request.args.get('sort', 'created_at')  # Default sort by created_at
+    sort_dir = request.args.get('dir', 'desc')  # Default sort direction is descending
+    
+    # Convert to integers
+    year = int(raw_year) if raw_year.isdigit() else current_year
+    quarter = int(raw_quarter) if raw_quarter.isdigit() else current_quarter
+    
+    # Calculate date range for the selected quarter
+    if quarter == 1:
+        start_date = datetime(year, 2, 1)
+        end_date = datetime(year, 4, 30, 23, 59, 59)
+    elif quarter == 2:
+        start_date = datetime(year, 5, 1)
+        end_date = datetime(year, 7, 31, 23, 59, 59)
+    elif quarter == 3:
+        start_date = datetime(year, 8, 1)
+        end_date = datetime(year, 10, 31, 23, 59, 59)
+    else:  # quarter == 4
+        start_date = datetime(year, 11, 1)
+        end_date = datetime(year + 1, 1, 31, 23, 59, 59)
+    
+    # Base query for approved MBOs
+    query = MBO.query.filter(
+        MBO.approval_status == 'Approved',
+        MBO.mbo_type != None,
+        MBO.mbo_type != ''
+    )
+    
+    # Filter by region if specified
+    if region != 'ALL':
+        # Get users from the selected region
+        region_user_ids = [user.id for user in User.query.filter_by(region=region).all()]
+        query = query.filter(MBO.user_id.in_(region_user_ids))
+    
+    # Filter by date range
+    query = query.filter(MBO.created_at >= start_date, MBO.created_at <= end_date)
+    
+    # Filter by MBO type if specified
+    if mbo_type:
+        query = query.filter(MBO.mbo_type == mbo_type)
+    
+    # Filter by employee if specified
+    if employee_id:
+        query = query.filter(MBO.user_id == int(employee_id))
+    
+    # Filter by search term if specified
+    if search_term:
+        query = query.filter(MBO.title.ilike(f'%{search_term}%') | 
+                            MBO.description.ilike(f'%{search_term}%'))
+    
+    # Apply sorting
+    if sort_by == 'title':
+        query = query.order_by(MBO.title.asc() if sort_dir == 'asc' else MBO.title.desc())
+    elif sort_by == 'type':
+        query = query.order_by(MBO.mbo_type.asc() if sort_dir == 'asc' else MBO.mbo_type.desc())
+    elif sort_by == 'progress':
+        query = query.order_by(MBO.progress_status.asc() if sort_dir == 'asc' else MBO.progress_status.desc())
+    elif sort_by == 'points':
+        query = query.order_by(MBO.points.asc() if sort_dir == 'asc' else MBO.points.desc())
+    elif sort_by == 'engineer':
+        # This is more complex as we need to join with the User table
+        query = query.join(User, MBO.user_id == User.id)
+        if sort_dir == 'asc':
+            query = query.order_by(User.first_name.asc(), User.last_name.asc())
+        else:
+            query = query.order_by(User.first_name.desc(), User.last_name.desc())
+    else:  # Default to created_at
+        query = query.order_by(MBO.created_at.asc() if sort_dir == 'asc' else MBO.created_at.desc())
+    
+    mbos = query.all()
+    
+    # Get all employees for the filter dropdown
+    employees = User.query.filter(User.role != 'Admin').all()
+    
+    # Get regions for the filter dropdown
+    regions = ['EMEA', 'AMER', 'APAC', 'ALL']
+    
+    return render_template(
+        'team_mbos.html',
+        mbos=mbos,
+        current_year=year,
+        current_quarter=quarter,
+        selected_type=mbo_type,
+        selected_employee=employee_id,
+        search_term=search_term,
+        employees=employees,
+        regions=regions,
+        selected_region=region,
+        sort_by=sort_by,
+        sort_dir=sort_dir
+    )
+
+@app.route('/download_team_mbos_report', methods=['GET'])
+@login_required
+def download_team_mbos_report():
+    """Generate and download a report of team MBOs."""
+    format_type = request.args.get('format', 'csv')
+    
+    # Get MBO IDs from session
+    mbo_ids = session.get('team_mbos', [])
+    
+    # Get MBOs from database
+    mbos = MBO.query.filter(MBO.id.in_(mbo_ids)).all()
+    
+    # Format MBOs for report
+    headers, data = format_mbos_for_report(mbos)
+    
+    if format_type == 'csv':
+        return generate_csv_report(headers, data, 'team_mbos_report.csv')
+    else:
+        return generate_excel_report(headers, data, 'team_mbos_report.xlsx')
+
+@app.route('/mbo/new', methods=['GET', 'POST'])
+@login_required
+def new_mbo():
+    form = MBOForm()
+    if form.validate_on_submit():
+        # Create a new MBO
+        mbo = MBO(
+            title=form.title.data,
+            description=form.description.data,
+            mbo_type=form.mbo_type.data,
+            progress_status=form.progress_status.data,
+            optional_link=form.optional_link.data,
+            user_id=current_user.id,
+            approval_status='Pending Approval'
+        )
+        db.session.add(mbo)
+        db.session.commit()
+        
+        # Send notification to manager if the user has one
+        if current_user.manager_id:
+            manager = User.query.get(current_user.manager_id)
+            if manager:
+                send_new_mbo_notification(mbo, manager)
+        
+        flash('Your MBO has been created!', 'success')
+        return redirect(url_for('my_mbos'))
+    
+    return render_template('mbo_form.html', title='New MBO', form=form, legend='New MBO')
+
+@app.route('/mbo/<int:mbo_id>')
+@login_required
+def mbo_details(mbo_id):
+    mbo = MBO.query.get_or_404(mbo_id)
+    return render_template('mbo_details.html', title=mbo.title, mbo=mbo)
+
+@app.route('/mbo/<int:mbo_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_mbo(mbo_id):
+    mbo = MBO.query.get_or_404(mbo_id)
+    
+    # Check if the current user is the creator of the MBO or a manager
+    if mbo.user_id != current_user.id and current_user.role != 'Manager' and current_user.role != 'Admin':
+        flash('You do not have permission to edit this MBO.', 'danger')
+        return redirect(url_for('mbo_details', mbo_id=mbo.id))
+    
+    form = MBOForm()
+    
+    if form.validate_on_submit():
+        # Store the old status to check if it changed
+        old_status = mbo.progress_status
+        
+        # Update the MBO
+        mbo.title = form.title.data
+        mbo.description = form.description.data
+        mbo.mbo_type = form.mbo_type.data
+        mbo.progress_status = form.progress_status.data
+        mbo.optional_link = form.optional_link.data
+        
+        # If the current user is not the creator, and the status changed, send a notification
+        if mbo.user_id != current_user.id and old_status != mbo.progress_status:
+            creator = User.query.get(mbo.user_id)
+            if creator:
+                send_mbo_status_notification(mbo, creator, old_status, mbo.progress_status)
+        
+        db.session.commit()
+        flash('Your MBO has been updated!', 'success')
+        
+        # Redirect based on user role
+        if current_user.role == 'Manager' or current_user.role == 'Admin':
+            return redirect(url_for('pending_approvals'))
+        else:
+            return redirect(url_for('my_mbos'))
+    
+    # Populate the form with the MBO data
+    elif request.method == 'GET':
+        form.title.data = mbo.title
+        form.description.data = mbo.description
+        form.mbo_type.data = mbo.mbo_type
+        form.progress_status.data = mbo.progress_status
+        form.optional_link.data = mbo.optional_link
+    
+    return render_template('edit_mbo.html', title='Edit MBO', form=form, legend='Edit MBO', mbo=mbo)
+
+@app.route('/pending_approvals')
+@login_required
+def pending_approvals():
+    # Check if the current user is a manager
+    if current_user.role != 'Manager' and current_user.role != 'Admin':
+        flash('You do not have permission to view this page.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Get all pending MBOs for the current user's team members
+    if current_user.role == 'Admin':
+        # Admin can see all pending MBOs
+        pending_mbos = MBO.query.filter_by(approval_status='Pending Approval').all()
+    else:
+        # Manager can only see pending MBOs from their team members
+        team_member_ids = [user.id for user in User.query.filter_by(manager_id=current_user.id).all()]
+        pending_mbos = MBO.query.filter(
+            MBO.approval_status == 'Pending Approval',
+            MBO.user_id.in_(team_member_ids)
+        ).all()
+    
+    return render_template('pending_approvals.html', title='Pending Approvals', pending_mbos=pending_mbos)
+
+@app.route('/approve_mbo/<int:mbo_id>', methods=['POST'])
+@login_required
+def approve_mbo(mbo_id):
+    # Check if the current user is a manager
+    if current_user.role != 'Manager' and current_user.role != 'Admin':
+        flash('You do not have permission to approve MBOs.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    mbo = MBO.query.get_or_404(mbo_id)
+    
+    # Check if the MBO is pending approval
+    if mbo.approval_status != 'Pending Approval':
+        flash('This MBO has already been processed.', 'warning')
+        return redirect(url_for('pending_approvals'))
+    
+    # Get the points from the form
+    points = request.form.get('points')
+    if not points or not points.isdigit():
+        flash('Please enter a valid number of points.', 'danger')
+        return redirect(url_for('pending_approvals'))
+    
+    # Update the MBO
+    mbo.approval_status = 'Approved'
+    mbo.points = int(points)
+    db.session.commit()
+    
+    flash('MBO has been approved!', 'success')
+    return redirect(url_for('pending_approvals'))
+
+@app.route('/reject_mbo/<int:mbo_id>', methods=['POST'])
+@login_required
+def reject_mbo(mbo_id):
+    # Check if the current user is a manager
+    if current_user.role != 'Manager' and current_user.role != 'Admin':
+        flash('You do not have permission to reject MBOs.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    mbo = MBO.query.get_or_404(mbo_id)
+    
+    # Check if the MBO is pending approval
+    if mbo.approval_status != 'Pending Approval':
+        flash('This MBO has already been processed.', 'warning')
+        return redirect(url_for('pending_approvals'))
+    
+    # Update the MBO
+    mbo.approval_status = 'Rejected'
+    db.session.commit()
+    
+    flash('MBO has been rejected.', 'success')
+    return redirect(url_for('pending_approvals'))
+
+@app.route('/users')
+@login_required
+def users():
+    """Display all users."""
+    # Check if the current user is an admin or manager
+    if current_user.role != 'Admin' and current_user.role != 'Manager':
+        flash('You do not have permission to view this page.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Get all users
+    all_users = User.query.all()
+    
+    return render_template('users.html', title='Users', users=all_users)
+
+@app.route('/user/<int:user_id>')
+@login_required
+def user_profile_view(user_id):
+    """View a user's profile."""
+    # Get the user
+    user = User.query.get_or_404(user_id)
+    
+    # Check if the current user has permission to view this profile
+    if current_user.id != user.id and current_user.role != 'Admin' and current_user.role != 'Manager':
+        flash('You do not have permission to view this profile.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    return render_template('user_profile.html', title=f"{user.first_name}'s Profile", user=user)
+
+@app.route('/reset_password/<int:user_id>', methods=['POST'])
+@login_required
+def reset_password(user_id):
+    """Reset a user's password to a default value."""
+    # Get the user
+    user = User.query.get_or_404(user_id)
+    
+    # Check if the current user has permission to reset this user's password
+    if current_user.id != user.id and current_user.role != 'Admin' and current_user.role != 'Manager':
+        flash('You do not have permission to reset this password.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Generate a reset token
+    token = generate_reset_token(user.email)
+    
+    # Send password reset email
+    reset_url = url_for('reset_password_with_token', token=token, _external=True)
+    send_password_reset_email(user.email, reset_url)
+    
+    flash('A password reset link has been sent to the user\'s email.', 'success')
+    
+    # Redirect based on the current user's role
+    if current_user.role == 'Admin' or current_user.role == 'Manager':
+        return redirect(url_for('users'))
+    else:
+        return redirect(url_for('dashboard'))
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    """Handle forgot password requests."""
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User.query.filter_by(email=email).first()
+        
+        if user:
+            # Generate a reset token
+            token = generate_reset_token(user.email)
+            
+            # Send password reset email

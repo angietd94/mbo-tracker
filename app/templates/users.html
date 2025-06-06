@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>Users</h1>
+
+{% if current_user.role == "Manager" %}
+<a href="{{ url_for('add_user') }}" class="btn-add-user">
+    <img src="{{ url_for('static', filename='img/add-user.png') }}" alt="Add User" style="height:24px;">
+    Add New User
+</a>
+{% endif %}
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th onclick="sortTable(0)">Profile</th>
+            <th onclick="sortTable(1)">First Name</th>
+            <th onclick="sortTable(2)">Last Name</th>
+            <th onclick="sortTable(3)">Email</th>
+            <th onclick="sortTable(4)">Role</th>
+            <th onclick="sortTable(5)">Region</th>
+            <th onclick="sortTable(6)">Manager</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td style="text-align: center; vertical-align: middle;">
+                {% if user.profile_picture and user.profile_picture != 'default.jpg' %}
+                    <img src="{{ user.profile_picture }}" alt="{{ user.first_name }}"
+                         style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #0046ad;">
+                {% else %}
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #0046ad; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; margin: 0 auto;">
+                        {{ user.first_name[0] }}{{ user.last_name[0] }}
+                    </div>
+                {% endif %}
+            </td>
+            <td>{{ user.first_name }}</td>
+            <td>{{ user.last_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>{{ user.region }}</td>
+            <td>
+                {% if user.manager %}
+                    {{ user.manager.first_name }} {{ user.manager.last_name }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% if current_user.role == "Manager" and user.role == "Admin" %}
+                <form action="{{ url_for('reset_password', user_id=user.id) }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-primary btn-sm">Reset Password</button>
+                </form>
+                {% endif %}
+                {% if current_user.role == "Manager" %}
+                <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn btn-primary btn-sm">Edit</a>
+                <form action="{{ url_for('delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.querySelector("table");
+    switching = true;
+    dir = "asc"; // Set the sorting direction to ascending
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="content-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="margin: 0;">Add New User</h1>
+        <a href="{{ url_for('users') }}" class="btn btn-primary" style="text-decoration: none;">Back to Users</a>
+    </div>
+
+    <form method="POST" style="max-width: 600px; margin: 0 auto;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div style="margin-bottom: 20px;">
+            <label for="email" style="display: block; margin-bottom: 8px; font-weight: 500;">Email Address *</label>
+            <input type="email" id="email" name="email" required 
+                   style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="first_name" style="display: block; margin-bottom: 8px; font-weight: 500;">First Name *</label>
+            <input type="text" id="first_name" name="first_name" required 
+                   style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="last_name" style="display: block; margin-bottom: 8px; font-weight: 500;">Last Name *</label>
+            <input type="text" id="last_name" name="last_name" required 
+                   style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="position" style="display: block; margin-bottom: 8px; font-weight: 500;">Position</label>
+            <input type="text" id="position" name="position" 
+                   style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="role" style="display: block; margin-bottom: 8px; font-weight: 500;">Role *</label>
+            <select id="role" name="role" required 
+                    style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;">
+                <option value="Employee">Employee</option>
+                <option value="Manager">Manager</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="region" style="display: block; margin-bottom: 8px; font-weight: 500;">Region *</label>
+            <select id="region" name="region" required 
+                    style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;">
+                <option value="EMEA">EMEA</option>
+                <option value="AMER">AMER</option>
+                <option value="APAC">APAC</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="manager_id" style="display: block; margin-bottom: 8px; font-weight: 500;">Manager</label>
+            <select id="manager_id" name="manager_id" 
+                    style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;">
+                <option value="">Select a manager</option>
+                {% for manager in managers %}
+                    <option value="{{ manager.id }}">{{ manager.first_name }} {{ manager.last_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button type="submit" style="width: 100%; background-color: #0046ad; color: white; border: none; padding: 12px;
+                                       border-radius: 4px; font-size: 16px; font-weight: 500; cursor: pointer;">
+                Add User
+            </button>
+        </div>
+    </form>
+
+    <div style="margin-top: 20px; text-align: center; color: #6c757d;">
+        <p>* Required fields</p>
+        <p>Note: A random password will be generated for the new user.</p>
+    </div>
+</div>
+{% endblock %}

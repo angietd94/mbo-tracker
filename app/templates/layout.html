@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>SnapLogic MBO Tracker</title>
+  <!-- Google Fonts - Roboto -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="{{ url_for('static', filename='img/snaplogic_logo_only_circle.png') }}" type="image/x-icon">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-bar-left">
+    <img src="{{ url_for('static', filename='img/snaplogic_logo.png') }}" alt="SnapLogic Logo" class="logo">
+    <span class="tracker-title">Solutions Engineer MBO Tracker</span>
+  </div>
+  <div class="top-bar-right">
+    {% if current_user.is_authenticated %}
+      <span class="welcome-text">Welcome, {{ current_user.first_name }}</span>
+      <a href="{{ url_for('user_profile') }}" class="btn-green">My Profile</a>
+      <a href="{{ url_for('logout') }}" class="btn-green">Logout</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="container">
+  <!-- SIDEBAR -->
+  {% if current_user.is_authenticated %}
+  <div class="sidebar">
+    <ul>
+      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('team_mbos') }}">Team MBOs</a></li>
+      <li><a href="{{ url_for('my_mbos') }}">My MBOs</a></li>
+      <li><a href="{{ url_for('add_mbo') }}">New MBO</a></li>
+      <li><a href="{{ url_for('users') }}">Users</a></li>
+      {% if current_user.role == 'Manager' %}
+        <li><a href="{{ url_for('pending_approvals') }}">Pending Approvals</a></li>
+      {% endif %}
+      <li class="separator" style="margin: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);"></li>
+      <li><a href="{{ url_for('compensation_calculator') }}"><i style="margin-right: 5px;">💰</i> Compensation Calculator</a></li>
+      <li><a href="{{ url_for('settings') }}"><i style="margin-right: 5px;">⚙️</i> Settings</a></li>
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category if category else 'info' }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<footer>
+  Website created by <a href="mailto:atdughetti@snaplogic.com">atdughetti@snaplogic.com</a>.
+  If you want to see the code of this project <a href="https://github.com/angietd94/mbo-tracker" target="_blank">click here</a>.
+</footer>
+
+<!-- Debug panel that can be toggled with Ctrl+Shift+D -->
+<div id="layout-debug-panel" style="position: fixed; bottom: 0; right: 0; background: rgba(0,0,0,0.8); color: #00ff00; padding: 10px; font-family: monospace; font-size: 12px; max-height: 200px; max-width: 400px; overflow: auto; z-index: 9999; display: none;">
+  <div id="layout-debug-log"></div>
+</div>
+
+<script>
+  console.log("Layout script loaded");
+  
+  // Add a global debug function that can be used by child templates
+  window.debugToConsole = function(message) {
+    console.log("[LAYOUT DEBUG] " + message);
+    
+    // Try to append to debug log if it exists
+    try {
+      const debugLogElement = document.getElementById('debug-log');
+      if (debugLogElement) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.textContent = `[${timestamp}] [LAYOUT] ${message}`;
+        debugLogElement.appendChild(logEntry);
+        debugLogElement.scrollTop = debugLogElement.scrollHeight;
+      }
+      
+      // Also log to layout debug panel
+      const layoutDebugLog = document.getElementById('layout-debug-log');
+      if (layoutDebugLog) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.textContent = `[${timestamp}] ${message}`;
+        layoutDebugLog.appendChild(logEntry);
+        layoutDebugLog.scrollTop = layoutDebugLog.scrollHeight;
+      }
+    } catch (e) {
+      console.error("Error writing to debug log:", e);
+    }
+  };
+  
+  // Add keyboard shortcut to toggle debug panel (Ctrl+Shift+D)
+  document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+      const panel = document.getElementById('layout-debug-panel');
+      if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        console.log("Debug panel toggled:", panel.style.display);
+      }
+    }
+  });
+  
+  // Log when DOM is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    window.debugToConsole("Layout: DOMContentLoaded event fired");
+  });
+  
+  // Log when window is fully loaded
+  window.onload = function() {
+    window.debugToConsole("Layout: Window.onload event fired");
+  };
+</script>
+</body>
+</html>
+
+

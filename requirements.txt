@@ -1,0 +1,15 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Login
+psycopg2-binary
+Flask-Mail
+Flask-WTF
+wtforms
+email-validator
+gunicorn
+Werkzeug<3.0
+python-dotenv
+flask-talisman
+boto3
+xlsxwriter

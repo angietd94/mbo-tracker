@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>User Profile</h1>
+
+<div style="display: flex; flex-wrap: wrap; gap: 30px;">
+    <!-- Profile Picture Section -->
+    <div style="flex: 0 0 250px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h3>Profile Picture</h3>
+            <div style="position: relative; width: 200px; height: 200px; margin: 0 auto 15px;">
+                <!-- Fallback with initials -->
+                {% if user.profile_picture and user.profile_picture != 'default.jpg' %}
+                    <div id="profile-fallback" style="width: 100%; height: 100%; border-radius: 50%; background-color: #0046ad; color: white; display: none; align-items: center; justify-content: center; font-size: 72px; font-weight: bold; position: absolute; top: 0; left: 0; z-index: 1;">
+                        {{ user.first_name[0] }}{{ user.last_name[0] }}
+                    </div>
+                {% else %}
+                    <div id="profile-fallback" style="width: 100%; height: 100%; border-radius: 50%; background-color: #0046ad; color: white; display: flex; align-items: center; justify-content: center; font-size: 72px; font-weight: bold; position: absolute; top: 0; left: 0; z-index: 1;">
+                        {{ user.first_name[0] }}{{ user.last_name[0] }}
+                    </div>
+                {% endif %}
+                
+                <!-- Actual profile image -->
+                {% if user.profile_picture and user.profile_picture != 'default.jpg' %}
+                    <img src="{{ user.get_profile_picture_url() }}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid #0046ad; position: absolute; top: 0; left: 0; z-index: 2; background-color: white;">
+                {% endif %}
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_profile_picture') }}" id="profile-picture-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div style="margin-bottom: 10px;">
+                    <input type="file" name="profile_picture" id="profile_picture" accept="image/*" style="display: none;" onchange="showPreview(this)">
+                    <label for="profile_picture" style="background-color: #0046ad; color: white; padding: 8px 15px; border-radius: 4px; cursor: pointer; display: inline-block;">
+                        Choose Image
+                    </label>
+                </div>
+                
+                <!-- Image preview -->
+                <div id="image-preview-container" style="display: none; margin: 10px 0;">
+                    <img id="image-preview" src="#" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 50%; border: 2px dashed #0046ad;">
+                </div>
+                
+                <!-- Submit button removed as we're using the custom upload button -->
+                
+                <button type="button" id="upload-button" style="background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                    Upload Picture
+                </button>
+                
+                {% if user.profile_picture and user.profile_picture != 'default.jpg' %}
+                <button type="button" id="remove-button" style="background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;" onclick="removeProfilePicture()">
+                    Remove Picture
+                </button>
+                {% endif %}
+            </form>
+            
+            <script>
+                function showPreview(input) {
+                    if (input.files && input.files[0]) {
+                        var reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            document.getElementById('image-preview').src = e.target.result;
+                            document.getElementById('image-preview-container').style.display = 'block';
+                        }
+                        
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                }
+                
+                // Handle the upload button click
+                document.getElementById('upload-button').addEventListener('click', function() {
+                    // Submit the form
+                    document.getElementById('profile-picture-form').submit();
+                });
+                
+                // Handle the remove button click
+                function removeProfilePicture() {
+                    if (confirm('Are you sure you want to remove your profile picture?')) {
+                        // Create a form dynamically
+                        var form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = "{{ url_for('remove_profile_picture') }}";
+                        
+                        // Add CSRF token
+                        var csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = 'csrf_token';
+                        csrfInput.value = "{{ csrf_token() }}";
+                        form.appendChild(csrfInput);
+                        
+                        // Append form to body and submit
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                }
+            </script>
+            
+            <p style="font-size: 0.9em; color: #6c757d; margin-top: 10px;">
+                Recommended: Square image, at least 200x200 pixels
+            </p>
+        </div>
+    </div>
+
+    <!-- Profile Information Section -->
+    <div style="flex: 1; min-width: 300px;">
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div>
+                <label for="first_name">First Name:</label>
+                <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}">
+            </div>
+
+            <div>
+                <label for="last_name">Last Name:</label>
+                <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}">
+            </div>
+
+            <div>
+                <label>Email:</label>
+                <p>{{ user.email }}</p> <!-- Email is not editable -->
+            </div>
+
+            <div>
+                <label>Role:</label>
+                <p>{{ user.role }}</p> <!-- Optional: make editable if you want -->
+            </div>
+
+            <div>
+                <label for="position">Position:</label>
+                <input type="text" id="position" name="position" value="{{ user.position }}">
+            </div>
+
+            <div>
+                <label for="region">Region:</label>
+                <select id="region" name="region">
+                    <option value="EMEA" {% if user.region == 'EMEA' %}selected{% endif %}>EMEA</option>
+                    <option value="AMER" {% if user.region == 'AMER' %}selected{% endif %}>AMER</option>
+                    <option value="APAC" {% if user.region == 'APAC' %}selected{% endif %}>APAC</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="manager_id">Manager:</label>
+                <select id="manager_id" name="manager_id">
+                    <option value="">-- No Manager --</option>
+                    {% for manager in managers %}
+                        <option value="{{ manager.id }}" {% if user.manager_id == manager.id %}selected{% endif %}>
+                            {{ manager.first_name }} {{ manager.last_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            
+    
+
+            <div>
+                <label for="password">Change Password:</label>
+                <input type="password" id="password" name="password" placeholder="Leave empty to keep current">
+            </div>
+
+            <button type="submit">Update Profile</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

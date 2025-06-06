@@ -1,0 +1,258 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+  <p style="margin: 0;">Currently, we are in <strong>Q{{ current_quarter }}</strong> of <strong>{{ current_year }}</strong>.</p>
+  
+  <form method="GET" action="{{ url_for('dashboard') }}" style="display: flex; justify-content: flex-start;">
+    <div style="display: flex; align-items: center; background-color: #f8f9fa; padding: 10px 15px; border-radius: 6px; gap: 10px; margin-top: -10px;">
+      <label for="region" style="font-weight: 500; white-space: nowrap;margin-top: -7px;">Region:</label>
+  
+      <select name="region" id="region"
+        style="padding: 8px; border-radius: 4px; border: 1px solid #ced4da; height: 38px; margin-top: 10px;">
+        {% for region_option in regions %}
+          <option value="{{ region_option }}" {% if region_option == selected_region %}selected{% endif %}>
+            {{ region_option }}
+          </option>
+        {% endfor %}
+      </select>
+  
+      <button type="submit" style="background-color: #0046ad; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; height: 38px; display: flex; align-items: center; justify-content: center; margin-top: -11px;">
+        Filter
+      </button>
+      
+    </div>
+  </form>
+  
+  <div style="display: flex; gap: 10px;">
+    <a href="{{ url_for('download_dashboard_excel', region=selected_region) }}" style="background-color: #28a745; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; display: flex; align-items: center; margin-top: -20px;">
+      <span style="margin-right: 5px;">📊</span> Download Excel
+    </a>
+    <a href="{{ url_for('download_dashboard_csv', region=selected_region) }}" style="background-color: #17a2b8; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; display: flex; align-items: center; margin-top: -20px;">
+      <span style="margin-right: 5px;">📄</span> Download CSV
+    </a>
+  </div>
+</div>
+
+<div class="info-box" style="background-color: #e7f5ff; border-left: 4px solid #0046ad; padding: 15px; margin-bottom: 25px; border-radius: 4px;">
+  <h3 style="margin-top: 0; color: #0046ad;">MBO Points System</h3>
+  <p style="margin-bottom: 0;">Every quarter, achieving 100% means earning 10 points. You can overachieve up to 150% by earning additional points through exceptional contributions.</p>
+</div>
+
+<!-- Team Progress - Moved to top as requested -->
+<h2 style="color: #0046ad; border-bottom: 2px solid #0046ad; padding-bottom: 10px; margin-bottom: 20px;">🏆 Team Progress This Quarter</h2>
+
+<!-- Horizontal scrollable container for all users -->
+<div style="position: relative; margin-bottom: 30px;">
+  <!-- Left/Right scroll buttons -->
+  <button id="scroll-left" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 10; background-color: #0046ad; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+    ←
+  </button>
+  <button id="scroll-right" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 10; background-color: #0046ad; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+    →
+  </button>
+  
+  <!-- Scrollable container -->
+  <div class="team-progress-container" style="display: flex; gap: 15px; margin-bottom: 30px; overflow-x: auto; padding: 10px 50px; scroll-behavior: smooth;">
+    
+    <!-- Users with points -->
+    {% for user, points, percentage in top_users %}
+    <div class="team-member-card" style="flex: 0 0 220px; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 15px; position: relative; overflow: hidden;">
+      <div style="display: flex; align-items: center; margin-bottom: 12px;">
+        {% if user.profile_picture and user.profile_picture != 'default.jpg' %}
+          <img src="{{ user.profile_picture }}" alt="{{ user.first_name }} {{ user.last_name }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 2px solid #0046ad;">
+        {% else %}
+          <div style="width: 45px; height: 45px; border-radius: 50%; background-color: #0046ad; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; margin-right: 12px;">
+            {{ user.first_name[0] }}{{ user.last_name[0] }}
+          </div>
+        {% endif %}
+        <div>
+          <h3 style="margin: 0; font-size: 16px;">{{ user.first_name }} {{ user.last_name }}</h3>
+          <p style="margin: 0; color: #6c757d; font-size: 13px;">{{ user.region }}</p>
+        </div>
+        {% if percentage > 100 %}
+          <div style="position: absolute; top: 8px; right: 8px; font-size: 20px;">🔥</div>
+        {% endif %}
+      </div>
+      
+      <div style="margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-weight: 500; font-size: 14px;">Progress</span>
+          <span style="font-weight: bold; font-size: 14px;">{{ percentage }}%</span>
+        </div>
+        <div style="height: 8px; background-color: #e9ecef; border-radius: 4px; overflow: hidden;">
+          {% set progress_width = percentage if percentage <= 150 else 150 %}
+          {% set progress_color = '#dc3545' if percentage < 50 else '#28a745' if percentage < 100 else '#0046ad' %}
+          <div style="height: 100%; width: {{ progress_width }}%; background-color: {{ progress_color }};"></div>
+        </div>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; font-size: 14px;">
+        <span>Total Points</span>
+        <span style="font-weight: bold;">{{ points }}/10</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.team-progress-container');
+    const scrollLeftBtn = document.getElementById('scroll-left');
+    const scrollRightBtn = document.getElementById('scroll-right');
+    
+    // Scroll left button
+    scrollLeftBtn.addEventListener('click', function() {
+      container.scrollBy({ left: -250, behavior: 'smooth' });
+    });
+    
+    // Scroll right button
+    scrollRightBtn.addEventListener('click', function() {
+      container.scrollBy({ left: 250, behavior: 'smooth' });
+    });
+  });
+</script>
+
+<!-- Learning -->
+<h2 style="color: #0046ad; border-bottom: 2px solid #0046ad; padding-bottom: 10px; margin-bottom: 15px; margin-top: 30px;">💡 Learning and Certification</h2>
+{% if learning_mbos %}
+<div style="overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
+    <thead>
+      <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+        <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('dashboard', sort='title', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Title ↑</a>
+          <a href="{{ url_for('dashboard', sort='title', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('dashboard', sort='engineer', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Engineer ↑</a>
+          <a href="{{ url_for('dashboard', sort='engineer', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; width: 15%;">
+          <a href="{{ url_for('dashboard', sort='points', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Points ↑</a>
+          <a href="{{ url_for('dashboard', sort='points', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('dashboard', sort='progress', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Progress ↑</a>
+          <a href="{{ url_for('dashboard', sort='progress', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; width: 25%;">
+          <a href="{{ url_for('dashboard', sort='created', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Date ↑</a>
+          <a href="{{ url_for('dashboard', sort='created', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for mbo in learning_mbos %}
+      {% set bg_color = '#d4edda' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#d1ecf1' %}
+        <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">
+          <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;"><a href="{{ url_for('my_mbos') }}" style="color: #0046ad; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
+          <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;">{{ mbo.creator.first_name }} {{ mbo.creator.last_name }}</td>
+          <td style="padding: 8px; text-align: center; border: 1px solid #dee2e6; font-weight: bold; width: 15%;">{{ mbo.points|default(0) }}</td>
+          <td style="padding: 8px; text-align: center; border: 1px solid #dee2e6; width: 20%;">{{ mbo.progress_status }}</td>
+          <td style="padding: 8px; text-align: center; border: 1px solid #dee2e6; width: 25%;">{{ mbo.created_at.strftime('%Y-%m-%d') }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>   
+  </table>
+</div>
+{% else %}
+<p>No Learning MBOs for this quarter.</p>
+{% endif %}
+
+<!-- Demo -->
+<h2 style="color: #0046ad; border-bottom: 2px solid #0046ad; padding-bottom: 10px; margin-bottom: 15px; margin-top: 30px;">🎬 Demo & Assets</h2>
+{% if demo_mbos %}
+<div style="overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
+    <thead>
+      <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+        <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('dashboard', sort='title', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Title ↑</a>
+          <a href="{{ url_for('dashboard', sort='title', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('dashboard', sort='engineer', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Engineer ↑</a>
+          <a href="{{ url_for('dashboard', sort='engineer', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; width: 15%;">
+          <a href="{{ url_for('dashboard', sort='points', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Points ↑</a>
+          <a href="{{ url_for('dashboard', sort='points', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('dashboard', sort='progress', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Progress ↑</a>
+          <a href="{{ url_for('dashboard', sort='progress', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; width: 25%;">
+          <a href="{{ url_for('dashboard', sort='created', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Date ↑</a>
+          <a href="{{ url_for('dashboard', sort='created', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for mbo in demo_mbos %}
+      {% set bg_color = '#d4edda' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#d1ecf1' %}
+        <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">
+          <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;"><a href="{{ url_for('my_mbos') }}" style="color: #0046ad; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
+          <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;">{{ mbo.creator.first_name }} {{ mbo.creator.last_name }}</td>
+          <td style="padding: 8px; text-align: center; border: 1px solid #dee2e6; font-weight: bold; width: 15%;">{{ mbo.points|default(0) }}</td>
+          <td style="padding: 8px; text-align: center; border: 1px solid #dee2e6; width: 20%;">{{ mbo.progress_status }}</td>
+          <td style="padding: 8px; text-align: center; border: 1px solid #dee2e6; width: 25%;">{{ mbo.created_at.strftime('%Y-%m-%d') }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>   
+  </table>
+</div>
+{% else %}
+<p>No Demo & Assets MBOs for this quarter.</p>
+{% endif %}
+
+<!-- Impact -->
+<h2 style="color: #0046ad; border-bottom: 2px solid #0046ad; padding-bottom: 10px; margin-bottom: 15px; margin-top: 30px;">🌎 Impact Outside of Pod</h2>
+{% if impact_mbos %}
+<div style="overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
+    <thead>
+      <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+        <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('dashboard', sort='title', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Title ↑</a>
+          <a href="{{ url_for('dashboard', sort='title', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('dashboard', sort='engineer', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Engineer ↑</a>
+          <a href="{{ url_for('dashboard', sort='engineer', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; width: 15%;">
+          <a href="{{ url_for('dashboard', sort='points', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Points ↑</a>
+          <a href="{{ url_for('dashboard', sort='points', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; width: 20%;">
+          <a href="{{ url_for('dashboard', sort='progress', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Progress ↑</a>
+          <a href="{{ url_for('dashboard', sort='progress', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+        <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; width: 25%;">
+          <a href="{{ url_for('dashboard', sort='created', dir='asc', region=selected_region) }}" style="text-decoration: none; color: inherit;">Date ↑</a>
+          <a href="{{ url_for('dashboard', sort='created', dir='desc', region=selected_region) }}" style="text-decoration: none; color: inherit;">↓</a>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for mbo in impact_mbos %}
+      {% set bg_color = '#d4edda' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#d1ecf1' %}
+        <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">
+          <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;"><a href="{{ url_for('my_mbos') }}" style="color: #0046ad; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
+          <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;">{{ mbo.creator.first_name }} {{ mbo.creator.last_name }}</td>
+          <td style="padding: 8px; text-align: center; border: 1px solid #dee2e6; font-weight: bold; width: 15%;">{{ mbo.points|default(0) }}</td>
+          <td style="padding: 8px; text-align: center; border: 1px solid #dee2e6; width: 20%;">{{ mbo.progress_status }}</td>
+          <td style="padding: 8px; text-align: center; border: 1px solid #dee2e6; width: 25%;">{{ mbo.created_at.strftime('%Y-%m-%d') }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>    
+  </table>
+</div>
+{% else %}
+<p>No Impact MBOs for this quarter.</p>
+{% endif %}
+{% endblock %}

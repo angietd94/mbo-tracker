@@ -1,0 +1,187 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>Compensation Calculator</h1>
+
+<div class="calculator-container" style="display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px;">
+    <!-- Calculator Form -->
+    <div class="calculator-form" style="flex: 1; min-width: 300px; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 25px;">
+        <h2 style="color: #0046ad; margin-top: 0; border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">MBO Compensation Calculator</h2>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="total-compensation" style="display: block; margin-bottom: 8px; font-weight: 500;">Total Annual Compensation:</label>
+            <input type="number" id="total-compensation" value="100000" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;" placeholder="Enter your total annual compensation">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="mbo-percentage" style="display: block; margin-bottom: 8px; font-weight: 500;">MBO Percentage (%):</label>
+            <input type="number" id="mbo-percentage" value="15" min="0" max="100" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;" placeholder="Enter MBO percentage (default: 15%)">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="achievement-percentage" style="display: block; margin-bottom: 8px; font-weight: 500;">Achievement Percentage (%):</label>
+            <input type="number" id="achievement-percentage" value="100" min="0" max="150" style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;" placeholder="Enter your achievement percentage (0-150%)">
+        </div>
+        
+        <button type="button" id="calculate-button" style="background-color: #0046ad; color: white; border: none; padding: 12px 20px; border-radius: 4px; font-weight: 500; cursor: pointer; width: 100%;">Calculate</button>
+    </div>
+    
+    <!-- Results Display -->
+    <div class="calculator-results" style="flex: 1; min-width: 300px; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 25px;">
+        <h2 style="color: #0046ad; margin-top: 0; border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">Results</h2>
+        
+        <div id="error-message" style="display: none; color: red; margin-bottom: 15px; padding: 10px; background-color: #ffeeee; border-radius: 4px; border-left: 4px solid red;"></div>
+        
+        <div id="results-container">
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 5px;">Annual MBO Compensation:</h3>
+                <p id="annual-mbo" style="font-size: 24px; font-weight: bold; margin-top: 0; color: #0046ad;">$0.00</p>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 5px;">Quarterly MBO Compensation:</h3>
+                <p id="quarterly-mbo" style="font-size: 24px; font-weight: bold; margin-top: 0; color: #28a745;">$0.00</p>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 5px;">This Quarter's Achievement:</h3>
+                <p id="achievement-amount" style="font-size: 24px; font-weight: bold; margin-top: 0; color: #17a2b8;">$0.00</p>
+            </div>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 20px;">
+            <p style="margin: 0; color: #6c757d; font-size: 14px;">
+                <strong>Note:</strong> This calculator provides an estimate based on the information you provide. Actual compensation may vary based on company policies and tax regulations.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Improved function to format currency
+function formatCurrency(amount) {
+    // Ensure amount is a number
+    if (typeof amount !== 'number') {
+        amount = 0;
+    }
+    // Format with $ sign, 2 decimal places, and commas for thousands
+    return '$' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+// Global calculate compensation function
+function calculateCompensation() {
+    try {
+        console.log("Calculate function called");
+        
+        // Get input elements
+        var totalCompElement = document.getElementById('total-compensation');
+        var mboPercentElement = document.getElementById('mbo-percentage');
+        var achievementPercentElement = document.getElementById('achievement-percentage');
+        
+        // Check if elements exist
+        if (!totalCompElement || !mboPercentElement || !achievementPercentElement) {
+            console.error("One or more input elements not found");
+            document.getElementById('error-message').textContent = "Error: Input elements not found";
+            document.getElementById('error-message').style.display = "block";
+            return;
+        }
+        
+        // Get input values with validation
+        var totalCompensation = parseFloat(totalCompElement.value) || 0;
+        var mboPercentage = parseFloat(mboPercentElement.value) || 0;
+        var achievementPercentage = parseFloat(achievementPercentElement.value) || 0;
+        
+        // Validate ranges
+        if (mboPercentage < 0 || mboPercentage > 100) {
+            console.warn("MBO percentage out of range:", mboPercentage);
+            mboPercentage = Math.max(0, Math.min(100, mboPercentage));
+            mboPercentElement.value = mboPercentage;
+        }
+        
+        if (achievementPercentage < 0 || achievementPercentage > 150) {
+            console.warn("Achievement percentage out of range:", achievementPercentage);
+            achievementPercentage = Math.max(0, Math.min(150, achievementPercentage));
+            achievementPercentElement.value = achievementPercentage;
+        }
+        
+        console.log("Input values:", {
+            totalCompensation: totalCompensation,
+            mboPercentage: mboPercentage,
+            achievementPercentage: achievementPercentage
+        });
+        
+        // Calculate results
+        var annualMbo = totalCompensation * (mboPercentage / 100);
+        var quarterlyMbo = annualMbo / 4;
+        var achievementAmount = quarterlyMbo * (achievementPercentage / 100);
+        
+        console.log("Calculated results:", {
+            annualMbo: annualMbo,
+            quarterlyMbo: quarterlyMbo,
+            achievementAmount: achievementAmount
+        });
+        
+        // Get result elements
+        var annualMboElement = document.getElementById('annual-mbo');
+        var quarterlyMboElement = document.getElementById('quarterly-mbo');
+        var achievementAmountElement = document.getElementById('achievement-amount');
+        
+        // Check if elements exist
+        if (!annualMboElement || !quarterlyMboElement || !achievementAmountElement) {
+            console.error("One or more result elements not found");
+            document.getElementById('error-message').textContent = "Error: Result elements not found";
+            document.getElementById('error-message').style.display = "block";
+            return;
+        }
+        
+        // Update results display
+        annualMboElement.textContent = formatCurrency(annualMbo);
+        quarterlyMboElement.textContent = formatCurrency(quarterlyMbo);
+        achievementAmountElement.textContent = formatCurrency(achievementAmount);
+        
+        // Hide any previous error messages
+        document.getElementById('error-message').style.display = "none";
+        
+        console.log("Results updated in DOM");
+    } catch (error) {
+        console.error("Error in calculateCompensation:", error);
+        document.getElementById('error-message').textContent = "Error calculating compensation: " + error.message;
+        document.getElementById('error-message').style.display = "block";
+    }
+}
+
+// Use DOMContentLoaded instead of window.onload to avoid conflicts
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOMContentLoaded - setting up calculator");
+    
+    // Set up event listeners for all inputs
+    var inputs = ['total-compensation', 'mbo-percentage', 'achievement-percentage'];
+    inputs.forEach(function(id) {
+        var element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', calculateCompensation);
+            element.addEventListener('change', calculateCompensation);
+        } else {
+            console.error("Input element not found:", id);
+        }
+    });
+    
+    // Set up event listener for the calculate button
+    var calculateButton = document.getElementById('calculate-button');
+    if (calculateButton) {
+        calculateButton.addEventListener('click', calculateCompensation);
+    } else {
+        console.error("Calculate button not found");
+    }
+    
+    // Calculate initial values
+    calculateCompensation();
+});
+
+// Backup initialization in case DOMContentLoaded already fired
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    console.log("Document already loaded - calculating immediately");
+    setTimeout(calculateCompensation, 1);
+}
+</script>
+{% endblock %}

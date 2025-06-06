@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Historical Team MBOs</h1>
+<p style="margin-top: -10px; color: #6c757d; font-size: 0.95em;">
+  <em>Only MBOs with <strong>approved</strong> status are shown in this view.</em>
+</p>
+
+<p>Click on a header to order by that column.</p>
+
+
+<table>
+  <thead>
+    <tr>
+      <th>
+        <a href="{{ url_for('historical_team_mbos', order_by='title', direction='asc' if order_by != 'title' or direction == 'desc' else 'desc') }}">
+          Title
+        </a>
+      </th>
+      <th>
+        <a href="{{ url_for('historical_team_mbos', order_by='type', direction='asc' if order_by != 'type' or direction == 'desc' else 'desc') }}">
+          Type
+        </a>
+      </th>
+      <th>
+        <a href="{{ url_for('historical_team_mbos', order_by='points', direction='asc' if order_by != 'points' or direction == 'desc' else 'desc') }}">
+          Points
+        </a>
+      </th>
+      <th>
+        <a href="{{ url_for('historical_team_mbos', order_by='created_at', direction='asc' if order_by != 'created_at' or direction == 'desc' else 'desc') }}">
+          Date
+        </a>
+      </th>
+      <th>Progress</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for mbo in team_mbos %}
+    <tr>
+      <td><a href="{{ url_for('mbo_details', mbo_id=mbo.id) }}" style="color: #000000; text-decoration: none;">{{ mbo.title }}</a></td>
+      <td>
+        {% if mbo.mbo_type == "Learning and Certification" %}
+          <img src="{{ url_for('static', filename='img/learning.png') }}" alt="Learning" style="height:24px; vertical-align:middle;">
+          <span style="background-color: #cce5ff; padding:2px 5px; border-radius:3px;">Learning</span>
+        {% elif mbo.mbo_type == "Demo & Assets" %}
+          <img src="{{ url_for('static', filename='img/demo.png') }}" alt="Demo" style="height:24px; vertical-align:middle;">
+          <span style="background-color: #d4edda; padding:2px 5px; border-radius:3px;">Demo</span>
+        {% elif mbo.mbo_type == "Impact Outside of Pod" %}
+          <img src="{{ url_for('static', filename='img/impact.png') }}" alt="Impact" style="height:24px; vertical-align:middle;">
+          <span style="background-color: #f8d7da; padding:2px 5px; border-radius:3px;">Impact</span>
+        {% else %}
+          {{ mbo.mbo_type }}
+        {% endif %}
+      </td>
+      <td>{{ mbo.points }}</td>
+      <td>{{ mbo.created_at.strftime('%Y-%m-%d') }}</td>
+      <td>{{ mbo.progress_status }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

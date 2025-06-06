@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>SnapLogic MBO Tracker - Authentication</title>
+  <!-- Google Fonts - Roboto -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="{{ url_for('static', filename='img/snaplogic_logo_only_circle.png') }}" type="image/x-icon">
+</head>
+<body>
+  <div class="container" style="margin-top: 0;">
+    <!-- Main content area for auth pages (no sidebar) -->
+    <div class="main-content" style="margin-left: 0;">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-message flash-{{ category if category else 'info' }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <footer>
+    Website created by <a href="mailto:atdughetti@snaplogic.com">atdughetti@snaplogic.com</a>. Report bugs to this email.
+  </footer>
+</body>
+</html>
