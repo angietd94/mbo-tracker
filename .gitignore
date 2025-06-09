@@ -71,4 +71,6 @@ temp/
 # Compiled files
 *.pyc
 *.pyo
-*.pyd
+*.pyd*.pem
+*.key
+*.crt
