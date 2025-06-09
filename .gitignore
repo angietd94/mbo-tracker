@@ -74,3 +74,4 @@ temp/
 *.pyd*.pem
 *.key
 *.crt
+*.pem
