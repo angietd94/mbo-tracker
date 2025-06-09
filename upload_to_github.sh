@@ -1,48 +1,76 @@
 #!/usr/bin/env bash
-# Sync this folder to the existing GitHub repo angietd94/mbo-tracker
-set -euo pipefail
+#   Sync this folder to GitHub (angietd94/mbo-tracker) in a safe, repeatable way
+#   ▸ If the remote moved ahead, we rebase; if histories diverged we stop & tell you.
 
-# ───── USER SETTINGS ───────────────────────────────────────────────
+set -euo pipefail
+IFS=$'\n\t'
+
+########################################
+# USER SETTINGS – change once
+########################################
 GITHUB_USERNAME="angietd94"
 REPO_NAME="mbo-tracker"
-DEFAULT_BRANCH="main"          # change to 'master' if you prefer
+DEFAULT_BRANCH="main"             # or 'master'
 AUTHOR_NAME="Angelica Tacca"
-AUTHOR_EMAIL="angelicataccadughetti@gmail.cm"
-# ───────────────────────────────────────────────────────────────────
+AUTHOR_EMAIL="angelicataccadughetti@gmail.com"
+########################################
 
-# 0. Make sure we have a token (repo scope) in $GITHUB_TOKEN
-if [[ -z "${GITHUB_TOKEN:-}" ]]; then
-  read -rsp "GitHub Personal Access Token: " GITHUB_TOKEN
-  echo
-fi
+# 0. Personal-access token
+: "${GITHUB_TOKEN:=$(read -rsp 'GitHub Personal Access Token: ' _tok && echo $_tok && echo)}"
 
 REMOTE="https://github.com/${GITHUB_USERNAME}/${REPO_NAME}.git"
 REMOTE_AUTH="https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GITHUB_USERNAME}/${REPO_NAME}.git"
 
-# 1. Initialise git only once
+# 1. Init repo on first run
 if [[ ! -d .git ]]; then
   git init
-  git checkout -b "${DEFAULT_BRANCH}"
+  git switch -c "${DEFAULT_BRANCH}"
   git config user.name  "${AUTHOR_NAME}"
   git config user.email "${AUTHOR_EMAIL}"
   git remote add origin "${REMOTE}"
 fi
 
-# 2. Ignore secrets
+# 2. Fetch latest remote state
+git fetch --prune origin "${DEFAULT_BRANCH}" || true   # tolerate empty remote
+
+# 3. Fast-forward or rebase if needed
+if git show-ref --verify --quiet "refs/remotes/origin/${DEFAULT_BRANCH}"; then
+  LOCAL=$(git rev-parse "${DEFAULT_BRANCH}")
+  REMOTEHEAD=$(git rev-parse "origin/${DEFAULT_BRANCH}")
+  BASE=$(git merge-base "${DEFAULT_BRANCH}" "origin/${DEFAULT_BRANCH}")
+
+  if [[ "$LOCAL" = "$REMOTEHEAD" ]]; then
+    echo "✓ Local branch already up to date."
+  elif [[ "$LOCAL" = "$BASE" ]]; then
+    echo "↻ Remote is ahead — pulling..."
+    git pull --rebase --autostash origin "${DEFAULT_BRANCH}"
+  elif [[ "$REMOTEHEAD" = "$BASE" ]]; then
+    echo "⟳ Local is ahead — will push after committing."
+  else
+    echo "⚠️  Local and remote have diverged."
+    echo "    Please resolve manually (merge or rebase) and re-run the script."
+    exit 1
+  fi
+fi
+
+# 4. Ignore common secret files
 touch .gitignore
 for p in '.env' '*.pem' '*.key' '*.crt' '*.log' '*.sqlite' '*.db'; do
   grep -qxF "$p" .gitignore || echo "$p" >> .gitignore
 done
 [[ -f .env ]] && cp -n .env .env.backup 2>/dev/null || true
 
-# 3. Commit any changes
+# 5. Stage & commit anything new
 git add -A
 if ! git diff --cached --quiet; then
   git commit -m "Sync $(date '+%F %T')"
+else
+  echo "• Nothing to commit."
 fi
 
-# 4. Force-sync remote branch to match local exactly
+# 6. Push (fast-forward) to remote
 echo "🚀  Pushing to GitHub (${DEFAULT_BRANCH})…"
-git push -u "${REMOTE_AUTH}" "${DEFAULT_BRANCH}" --force-with-lease
+git push "${REMOTE_AUTH}" "${DEFAULT_BRANCH}"  \
+        --follow-tags --set-upstream
 
-echo "✅  Done – view at ${REMOTE}"
+echo "✅  Done – see ${REMOTE}"
