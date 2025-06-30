@@ -1,0 +1,15 @@
+MBO completed – {{ mbo.title }}
+
+Hello {{ manager.first_name }},
+
+An MBO has been marked as FINISHED:
+
+Title: {{ mbo.title }}
+Type: {{ mbo.mbo_type }}
+Engineer: {{ mbo.creator.first_name }} {{ mbo.creator.last_name }}
+Description: {{ mbo.description }}
+
+You can review the completed MBO here: {{ base_url }}/mbo/{{ mbo.id }}
+
+This is an automated message from the SnapLogic MBO Tracker.
+Sent from: notificationsmbo@snaplogic.com

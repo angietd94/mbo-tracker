@@ -66,7 +66,12 @@ def dashboard():
 
     top_users = []
     for user, total_points in top_users_data:
-        percentage = round((total_points / 10) * 100)
+        # Handle case where total_points is None
+        if total_points is None:
+            total_points = 0
+            percentage = 0
+        else:
+            percentage = round((total_points / 10) * 100)
         top_users.append((user, total_points, percentage))
 
     top_users.sort(key=lambda x: x[2], reverse=True)
@@ -92,7 +97,8 @@ def dashboard():
     all_users_with_points.extend(filtered_top_users)
     
     for user in users_without_mbos:
-        if (region == 'ALL' or user.region == region) and user.email != 'admin@snaplogic.com':
+        # Hide admin users from the dashboard
+        if (region == 'ALL' or user.region == region) and user.role != 'Admin' and not user.email.startswith('admin@'):
             all_users_with_points.append((user, 0, 0))
     
     all_users_with_points.sort(key=lambda x: x[2], reverse=True)
@@ -158,7 +164,12 @@ def download_dashboard_excel():
     
     top_users = []
     for user, total_points in top_users_data:
-        percentage = round((total_points / 10) * 100)
+        # Handle case where total_points is None
+        if total_points is None:
+            total_points = 0
+            percentage = 0
+        else:
+            percentage = round((total_points / 10) * 100)
         top_users.append((user, total_points, percentage))
     
     # Filter by region if specified
@@ -231,7 +242,12 @@ def download_dashboard_csv():
     
     top_users = []
     for user, total_points in top_users_data:
-        percentage = round((total_points / 10) * 100)
+        # Handle case where total_points is None
+        if total_points is None:
+            total_points = 0
+            percentage = 0
+        else:
+            percentage = round((total_points / 10) * 100)
         top_users.append((user, total_points, percentage))
     
     # Filter by region if specified

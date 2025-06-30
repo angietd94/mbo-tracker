@@ -7,23 +7,13 @@ from app import app, db
 def settings():
     """User settings page."""
     if request.method == 'POST':
-        # Update email notification preferences
-        email_notifications = 'email_notifications' in request.form
         try:
-            current_user.email_notifications = email_notifications
-            db.session.commit()  # Add commit to save changes to database
+            # Handle profile picture upload or other settings here
             flash('Settings updated successfully')
+            db.session.commit()
         except Exception as e:
             app.logger.error(f"Error updating settings: {e}")
             flash('An error occurred while updating settings')
         return redirect(url_for('settings'))
     
     return render_template('settings.html')
-
-@app.route('/api/settings', methods=['GET'])
-@login_required
-def api_settings():
-    """API endpoint for user settings."""
-    return jsonify({
-        'email_notifications': current_user.email_notifications
-    })

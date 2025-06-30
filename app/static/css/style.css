@@ -113,6 +113,8 @@ body {
     margin-left: 220px; /* same as .sidebar width */
     padding: 30px;
     box-sizing: border-box;
+    overflow-y: auto; /* Enable vertical scrolling */
+    height: calc(100vh - 70px); /* Full height minus top bar */
 }
 
 /* --- FOOTER pinned to bottom (optional) --- */
@@ -193,7 +195,7 @@ table {
 
 /* Custom background colors for MBO progress */
 .bg-finished {
-    background-color: #28a745;
+    background-color: #a7f3d0; /* Lighter, more accessible green */
 }
 
 .bg-mvp {

@@ -66,7 +66,7 @@
 
 <!-- RESULTS TABLE -->
 {% if mbos and mbos|length > 0 %}
-<div style="overflow-x: auto;">
+<div style="overflow-x: auto; max-height: 600px; overflow-y: auto;">
   <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
     <thead>
       <tr style="background-color: #f8f9fa; border-bottom: 2px solid #0046ad;">
@@ -101,7 +101,7 @@
     </thead>
   <tbody>
   {% for mbo in mbos %}
-    {% set bg_color = '#28a745' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#ffffff' %}
+    {% set bg_color = '#a7f3d0' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#ffffff' %}
     {% set quarter = ((mbo.created_at.month - 2) // 3) + 1 if mbo.created_at else 'N/A' %}
     {% set year = mbo.created_at.year if mbo.created_at else 'N/A' %}
     <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">

@@ -27,7 +27,6 @@ class User(UserMixin, db.Model):
     # New fields
     region = db.Column(db.String(10), default='EMEA')  # EMEA, AMER, or APAC
     manager_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    email_notifications = db.Column(db.Boolean, default=True)
     quarter_compensation = db.Column(db.Float, nullable=True)
     
     # Relationships

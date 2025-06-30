@@ -40,6 +40,119 @@
   <p style="margin-bottom: 0;">Every quarter, achieving 100% means earning 10 points. You can overachieve up to 150% by earning additional points through exceptional contributions.</p>
 </div>
 
+<!-- Points Summary Bar -->
+<div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+  <h3 style="margin-top: 0; color: #0046ad; margin-bottom: 15px;">Your MBO Points Summary</h3>
+  
+  {% set learning_points = 0 %}
+  {% set demo_points = 0 %}
+  {% set impact_points = 0 %}
+  
+  {% for mbo in learning_mbos %}
+    {% if mbo.creator.id == current_user.id %}
+      {% set learning_points = learning_points + mbo.points|default(0) %}
+    {% endif %}
+  {% endfor %}
+  
+  {% for mbo in demo_mbos %}
+    {% if mbo.creator.id == current_user.id %}
+      {% set demo_points = demo_points + mbo.points|default(0) %}
+    {% endif %}
+  {% endfor %}
+  
+  {% for mbo in impact_mbos %}
+    {% if mbo.creator.id == current_user.id %}
+      {% set impact_points = impact_points + mbo.points|default(0) %}
+    {% endif %}
+  {% endfor %}
+  
+  {% set total_points = learning_points + demo_points + impact_points %}
+  {% set learning_over = learning_points > 6 %}
+  {% set demo_over = demo_points > 4 %}
+  {% set impact_over = impact_points > 8 %}
+  
+  <div style="margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+      <span style="font-weight: 500;">Total Points: {{ total_points }}/15</span>
+      <span style="font-weight: 500;">{{ (total_points / 15 * 100)|round }}%</span>
+    </div>
+    
+    <div style="height: 25px; background-color: #e9ecef; border-radius: 4px; overflow: hidden; position: relative;">
+      <!-- Learning segment -->
+      {% set learning_width = (learning_points / 15 * 100)|round %}
+      <div style="position: absolute; left: 0; top: 0; height: 100%; width: {{ learning_width }}%; background-color: #6366f1; display: flex; align-items: center; justify-content: center;">
+        {% if learning_width > 10 %}
+        <span style="color: white; font-size: 12px; font-weight: 500;">{{ learning_points }}</span>
+        {% endif %}
+      </div>
+      
+      <!-- Demo segment -->
+      {% set demo_width = (demo_points / 15 * 100)|round %}
+      <div style="position: absolute; left: {{ learning_width }}%; top: 0; height: 100%; width: {{ demo_width }}%; background-color: #f59e0b; display: flex; align-items: center; justify-content: center;">
+        {% if demo_width > 10 %}
+        <span style="color: white; font-size: 12px; font-weight: 500;">{{ demo_points }}</span>
+        {% endif %}
+      </div>
+      
+      <!-- Impact segment -->
+      {% set impact_width = (impact_points / 15 * 100)|round %}
+      <div style="position: absolute; left: {{ learning_width + demo_width }}%; top: 0; height: 100%; width: {{ impact_width }}%; background-color: #10b981; display: flex; align-items: center; justify-content: center;">
+        {% if impact_width > 10 %}
+        <span style="color: white; font-size: 12px; font-weight: 500;">{{ impact_points }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <!-- Legend and category breakdown -->
+  <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 15px;">
+    <!-- Learning -->
+    <div style="flex: 1; min-width: 200px;">
+      <div style="display: flex; align-items: center; margin-bottom: 5px;">
+        <div style="width: 15px; height: 15px; background-color: #6366f1; margin-right: 8px; border-radius: 3px;"></div>
+        <span style="font-weight: 500;">Learning & Certification</span>
+        {% if learning_over %}
+        <span style="margin-left: 5px; color: #ef4444; font-size: 18px;" title="Exceeds maximum allowed points (6)">⚠️</span>
+        {% endif %}
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>{{ learning_points }} points</span>
+        <span style="color: #6b7280;">Target: 4, Max: 6</span>
+      </div>
+    </div>
+    
+    <!-- Demo -->
+    <div style="flex: 1; min-width: 200px;">
+      <div style="display: flex; align-items: center; margin-bottom: 5px;">
+        <div style="width: 15px; height: 15px; background-color: #f59e0b; margin-right: 8px; border-radius: 3px;"></div>
+        <span style="font-weight: 500;">Demo & Assets</span>
+        {% if demo_over %}
+        <span style="margin-left: 5px; color: #ef4444; font-size: 18px;" title="Exceeds maximum allowed points (4)">⚠️</span>
+        {% endif %}
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>{{ demo_points }} points</span>
+        <span style="color: #6b7280;">Target: 2, Max: 4</span>
+      </div>
+    </div>
+    
+    <!-- Impact -->
+    <div style="flex: 1; min-width: 200px;">
+      <div style="display: flex; align-items: center; margin-bottom: 5px;">
+        <div style="width: 15px; height: 15px; background-color: #10b981; margin-right: 8px; border-radius: 3px;"></div>
+        <span style="font-weight: 500;">Impact Outside of Pod</span>
+        {% if impact_over %}
+        <span style="margin-left: 5px; color: #ef4444; font-size: 18px;" title="Exceeds maximum allowed points (8)">⚠️</span>
+        {% endif %}
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>{{ impact_points }} points</span>
+        <span style="color: #6b7280;">Target: 4, Max: 8</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Team Progress - Moved to top as requested -->
 <h2 style="color: #0046ad; border-bottom: 2px solid #0046ad; padding-bottom: 10px; margin-bottom: 20px;">🏆 Team Progress This Quarter</h2>
 
@@ -118,7 +231,7 @@
 <!-- Learning -->
 <h2 style="color: #0046ad; border-bottom: 2px solid #0046ad; padding-bottom: 10px; margin-bottom: 15px; margin-top: 30px;">💡 Learning and Certification</h2>
 {% if learning_mbos %}
-<div style="overflow-x: auto;">
+<div style="overflow-x: auto; max-height: 400px; overflow-y: auto;">
   <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
     <thead>
       <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
@@ -146,7 +259,7 @@
     </thead>
     <tbody>
       {% for mbo in learning_mbos %}
-      {% set bg_color = '#d4edda' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#d1ecf1' %}
+      {% set bg_color = '#a7f3d0' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#d1ecf1' %}
         <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">
           <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;"><a href="{{ url_for('my_mbos') }}" style="color: #0046ad; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
           <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;">{{ mbo.creator.first_name }} {{ mbo.creator.last_name }}</td>
@@ -165,7 +278,7 @@
 <!-- Demo -->
 <h2 style="color: #0046ad; border-bottom: 2px solid #0046ad; padding-bottom: 10px; margin-bottom: 15px; margin-top: 30px;">🎬 Demo & Assets</h2>
 {% if demo_mbos %}
-<div style="overflow-x: auto;">
+<div style="overflow-x: auto; max-height: 400px; overflow-y: auto;">
   <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
     <thead>
       <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
@@ -193,7 +306,7 @@
     </thead>
     <tbody>
       {% for mbo in demo_mbos %}
-      {% set bg_color = '#d4edda' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#d1ecf1' %}
+      {% set bg_color = '#a7f3d0' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#d1ecf1' %}
         <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">
           <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;"><a href="{{ url_for('my_mbos') }}" style="color: #0046ad; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
           <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;">{{ mbo.creator.first_name }} {{ mbo.creator.last_name }}</td>
@@ -212,7 +325,7 @@
 <!-- Impact -->
 <h2 style="color: #0046ad; border-bottom: 2px solid #0046ad; padding-bottom: 10px; margin-bottom: 15px; margin-top: 30px;">🌎 Impact Outside of Pod</h2>
 {% if impact_mbos %}
-<div style="overflow-x: auto;">
+<div style="overflow-x: auto; max-height: 400px; overflow-y: auto;">
   <table style="width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
     <thead>
       <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
@@ -240,7 +353,7 @@
     </thead>
     <tbody>
       {% for mbo in impact_mbos %}
-      {% set bg_color = '#d4edda' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#d1ecf1' %}
+      {% set bg_color = '#a7f3d0' if mbo.progress_status == 'Finished' else '#fff3cd' if mbo.progress_status == 'In progress' else '#d1ecf1' %}
         <tr style="background-color: {{ bg_color }}; border-bottom: 1px solid #dee2e6;">
           <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;"><a href="{{ url_for('my_mbos') }}" style="color: #0046ad; text-decoration: none; font-weight: 500;">{{ mbo.title }}</a></td>
           <td style="padding: 8px; border: 1px solid #dee2e6; width: 20%;">{{ mbo.creator.first_name }} {{ mbo.creator.last_name }}</td>

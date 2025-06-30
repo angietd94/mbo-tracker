@@ -35,8 +35,10 @@ class Config:
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.example.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() in ['true', 'yes', '1']
+    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'False').lower() in ['true', 'yes', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
+    BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
     
     # Admin user - Use environment variables for sensitive info
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@example.com')

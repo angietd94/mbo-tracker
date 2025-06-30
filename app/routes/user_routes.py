@@ -70,9 +70,25 @@ def user_profile():
             current_user.manager_id = int(manager_id)
         
         # Handle password change if provided
+        current_password = request.form.get('current_password')
         new_password = request.form.get('new_password')
-        if new_password:
+        confirm_password = request.form.get('confirm_password')
+        
+        if new_password and current_password:
+            # Verify current password is correct
+            from werkzeug.security import check_password_hash
+            if not check_password_hash(current_user.password_hash, current_password):
+                flash('Current password is incorrect.', 'error')
+                return redirect(url_for('user_profile'))
+            
+            # Verify new password and confirm password match
+            if new_password != confirm_password:
+                flash('New password and confirm password do not match.', 'error')
+                return redirect(url_for('user_profile'))
+            
+            # Set the new password
             current_user.set_password(new_password)
+            flash('Password changed successfully!', 'success')
         
         # Handle profile picture upload
         profile_pic = request.files.get('profile_picture')
@@ -130,7 +146,15 @@ def user_profile():
 def users():
     """Users list page."""
     # Allow all users to view the users page
-    users = User.query.all()
+    if current_user.role == 'Admin':
+        # Admin can see all users
+        users = User.query.all()
+    else:
+        # Non-admin users don't see admin users
+        users = User.query.filter(
+            (User.role != 'Admin') &
+            ~User.email.like('admin@%')
+        ).all()
     return render_template('users.html', users=users)
 
 @app.route('/add_user', methods=['GET', 'POST'])

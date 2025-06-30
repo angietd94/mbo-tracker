@@ -1,0 +1,29 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 5px;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="https://www.snaplogic.com/wp-content/themes/snaplogic-2022/assets/images/snaplogic-logo.svg" alt="SnapLogic Logo" style="height: 50px;">
+    </div>
+    <h2 style="color: #0046ad; margin-bottom: 20px;">New MBO Pending Approval</h2>
+    <p>Hello {{ manager.first_name }},</p>
+    <p>{{ mbo.creator.first_name }} {{ mbo.creator.last_name }} has submitted a new MBO for your approval:</p>
+    
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #0046ad;">{{ mbo.title }}</h3>
+        <p><strong>Type:</strong> {{ mbo.mbo_type }}</p>
+        <p><strong>Description:</strong> {{ mbo.description }}</p>
+        <p><strong>Status:</strong> {{ mbo.progress_status }}</p>
+    </div>
+    
+    <p>Please review this MBO at your earliest convenience.</p>
+    
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{{ base_url }}/mbo/{{ mbo.id }}" 
+           style="background-color: #0046ad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            Review MBO
+        </a>
+    </div>
+    
+    <p style="margin-top: 30px; color: #6c757d; font-size: 0.9em;">
+        This is an automated message from the SnapLogic MBO Tracker.<br>
+        Sent from: notificationsmbo@snaplogic.com
+    </p>
+</div>

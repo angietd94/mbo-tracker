@@ -49,7 +49,7 @@
       <select name="progress_status" required>
         {% set status = mbo.progress_status if mbo else 'In progress' %}
         <option value="In progress" {% if status == 'In progress' or status == 'New' or status == 'In Progress' %}selected{% endif %}>In progress</option>
-        <option value="Finished" {% if status == 'Completed' or status == 'Finished' or status == 'MVP' %}selected{% endif %}>Completed</option>
+        <option value="Finished" {% if status == 'Completed' or status == 'Finished' or status == 'MVP' %}selected{% endif %}>Finished</option>
       </select>
     
       <!-- Approval Status (Manager Only) -->

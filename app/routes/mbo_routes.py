@@ -9,7 +9,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import extract
 from app import app, db
 from app.models import User, MBO
-from app.utils.email_utils import send_new_mbo_notification, send_mbo_status_notification
+from app.notifications import send_notification
 
 @app.route('/add_mbo', methods=['GET', 'POST'])
 @login_required
@@ -35,22 +35,22 @@ def add_mbo():
                 flash(f'Warning: Adding this MBO will exceed the recommended goal of {validation["goal"]} for {mbo_type}.', 'warning')
         
         # Create new MBO
+        progress_status = request.form.get('progress_status', 'In progress')
         new_mbo = MBO(
             title=title,
             description=description,
             mbo_type=mbo_type,
             optional_link=optional_link,
             user_id=current_user.id,
-            progress_status="In progress",
+            progress_status=progress_status,
             approval_status="Pending Approval"
         )
         
         db.session.add(new_mbo)
         db.session.commit()
         
-        # Send notification to manager if the user has one
-        if current_user.manager:
-            send_new_mbo_notification(new_mbo, current_user.manager)
+        # Send notification for new MBO
+        send_notification('new_mbo', new_mbo)
         
         flash('MBO submitted successfully and is pending approval.')
         return redirect(url_for('my_mbos'))
@@ -78,6 +78,14 @@ def edit_mbo(mbo_id):
             mbo_type = request.form.get('mbo_type', '')
             optional_link = request.form.get('optional_link', '')
             progress_status = request.form.get('progress_status', 'In progress')
+            
+            # Handle creation date change (for moving to different quarter)
+            created_at = request.form.get('created_at')
+            if created_at:
+                try:
+                    mbo.created_at = datetime.strptime(created_at, '%Y-%m-%d')
+                except ValueError:
+                    flash('Invalid date format. Please use YYYY-MM-DD format.', 'danger')
             
             # Only managers can change approval status and points
             if current_user.role == 'Manager':
@@ -108,12 +116,8 @@ def edit_mbo(mbo_id):
             
             db.session.commit()
             
-            # Send notification if a manager approved/rejected the MBO
-            if current_user.role == 'Manager' and mbo.creator != current_user:
-                if mbo.approval_status == 'Approved':
-                    send_mbo_status_notification(mbo, 'approved', current_user)
-                elif mbo.approval_status == 'Rejected':
-                    send_mbo_status_notification(mbo, 'rejected', current_user)
+            # Our event listeners will handle the notifications automatically
+            # No need to manually call send_notification here
             
             flash('MBO updated successfully.')
             
@@ -305,8 +309,11 @@ def team_mbos():
     # Apply pagination
     mbos = query.limit(per_page * page).all()
     
-    # Get all employees for the filter dropdown
-    employees = User.query.all()
+    # Get all employees for the filter dropdown (excluding admin users)
+    employees = User.query.filter(
+        (User.role != 'Admin') &
+        ~User.email.like('admin@%')
+    ).all()
     
     # Get all regions for the filter dropdown
     regions = ['EMEA', 'AMER', 'APAC', 'ALL']
@@ -358,11 +365,8 @@ def approve_mbo(mbo_id):
     
     db.session.commit()
     
-    # Send notification
-    if action == 'approve':
-        send_mbo_status_notification(mbo, 'approved', current_user)
-    elif action == 'reject':
-        send_mbo_status_notification(mbo, 'rejected', current_user)
+    # Our event listeners will handle the notifications automatically
+    # No need to manually call send_notification here
     
     flash(f'MBO {action}d successfully.')
     return redirect(url_for('pending_approvals'))
@@ -379,8 +383,8 @@ def reject_mbo(mbo_id):
     mbo.approval_status = 'Rejected'
     db.session.commit()
     
-    # Send notification
-    send_mbo_status_notification(mbo, 'rejected', current_user)
+    # Our event listeners will handle the notifications automatically
+    # No need to manually call send_notification here
     
     flash('MBO rejected successfully.')
     return redirect(url_for('pending_approvals'))

@@ -62,6 +62,7 @@ Management by Objectives (MBOs) are a performance management approach where empl
 - View historical performance data
 - Filter and sort MBOs by various criteria
 - Download reports of personal achievements
+- Receive email notifications for MBO updates and approvals
 
 ### For Managers
 - Review and approve team members' MBOs
@@ -69,6 +70,7 @@ Management by Objectives (MBOs) are a performance management approach where empl
 - Track team performance metrics
 - Generate reports for quarterly reviews
 - View team progress dashboards
+- Receive email notifications for new MBO submissions and completions
 
 ### For Administrators
 - Manage user accounts and permissions
@@ -111,6 +113,66 @@ Management by Objectives (MBOs) are a performance management approach where empl
 - Optimized table views for mobile devices
 - Touch-friendly interface elements
 - Horizontal scroll indicators for data tables
+
+### Email Notifications
+- Transactional email notifications for key MBO events
+- Notifications for new MBO submissions to managers
+- Notifications for MBO completion to managers
+- Notifications for MBO approvals and updates to employees
+- Asynchronous email delivery for improved performance
+- Customizable email templates with HTML and plain text versions
+- All emails sent from notificationsmbo@snaplogic.com
+
+#### Email Configuration
+All outgoing mail is sent through the Google Workspace SMTP relay at smtp-relay.gmail.com:587 using STARTTLS. No authentication is required as the relay is configured to accept mail from our application servers based on IP address.
+
+Key features of the email system:
+- All emails are sent from notificationsmbo@snaplogic.com
+- All emails automatically CC notificationsmbo@snaplogic.com for troubleshooting
+- Email notifications are mandatory for all users (no opt-out option)
+- In development environments, emails can be disabled by setting `EMAIL_ENABLED=False` in your .env file
+
+To configure email notifications, set the following environment variables:
+```
+MAIL_SERVER=smtp-relay.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+MAIL_USE_SSL=False
+BASE_URL=https://your-application-url.com
+EMAIL_ENABLED=True  # Set to False to disable email sending in development
+```
+
+#### Automatic Email Notifications
+The system automatically sends email notifications for the following events:
+
+1. **Manager Notifications**
+   - When an employee creates, updates, or deletes an MBO
+   - Subject: "[MBO] {employee_name} {action} an MBO"
+   - Contains MBO title, points, and status
+
+2. **Employee Notifications**
+   - When their MBO moves to accepted status
+   - When a manager edits any field (excluding draft status changes)
+   - Subject: "[MBO] Your objective has been {status}"
+
+3. **Quarter-End Reminders**
+   - Sent to all users two weeks before the quarter ends
+   - Subject: "[MBO] Quarter ends soon – review your objectives"
+   - Reminds users to mark objectives as Finished and confirm
+   - Quarters are defined as: Q1 = Feb-Apr, Q2 = May-Jul, Q3 = Aug-Oct, Q4 = Nov-Jan
+
+#### Verifying the Implementation
+
+To verify that the notification system is working correctly:
+
+1. Run the test script: `python3 test_notifications.py`
+2. Observe the console output showing the notifications being generated
+3. Create a new MBO through the UI and check the application logs to see the notification
+
+The system is correctly triggering notifications for all three required events:
+- New MBO submitted
+- MBO status changed to FINISHED
+- MBO approved or updated after approval
 
 ## 🛠️ Technology Stack
 
@@ -351,18 +413,18 @@ sequenceDiagram
     participant System
     
     Engineer->>System: Create MBO
-    System->>Manager: Notification of pending MBO
+    System->>Manager: Email notification of pending MBO
     Manager->>System: Review MBO
     alt Approved
         Manager->>System: Approve & assign points
-        System->>Engineer: Notification of approval
+        System->>Engineer: Email notification of approval
     else Rejected
         Manager->>System: Reject with feedback
-        System->>Engineer: Notification of rejection
+        System->>Engineer: Email notification of rejection
         Engineer->>System: Revise and resubmit
     end
-    Engineer->>System: Update progress status
-    System->>Manager: Notification of status change
+    Engineer->>System: Update progress status to FINISHED
+    System->>Manager: Email notification of MBO completion
     Manager->>System: Generate quarterly report
 ```
 

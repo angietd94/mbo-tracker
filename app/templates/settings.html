@@ -5,27 +5,11 @@
 
 <div class="settings-container" style="max-width: 800px; margin: 0 auto;">
     <div class="card" style="background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 25px; margin-bottom: 30px;">
-        <h2 style="color: #0046ad; margin-top: 0; border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">Email Notifications</h2>
+        <h2 style="color: #0046ad; margin-top: 0; border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">Profile Settings</h2>
         
         <form method="POST" action="{{ url_for('settings') }}" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
-            <div style="margin-bottom: 20px;">
-                <label style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="checkbox" name="email_notifications" {% if current_user.email_notifications %}checked{% endif %} 
-                           style="margin-right: 10px; width: 18px; height: 18px;">
-                    <span style="font-size: 16px;">Receive email notifications</span>
-                </label>
-                <p style="color: #6c757d; margin-top: 8px; margin-left: 28px; font-size: 14px;">
-                    When enabled, you will receive email notifications for:
-                </p>
-                <ul style="color: #6c757d; margin-top: 8px; margin-left: 28px; font-size: 14px;">
-                    <li>New MBO approvals</li>
-                    <li>MBO status changes</li>
-                    <li>MBO edits by your manager</li>
-                </ul>
-            </div>
-
             <div style="margin-bottom: 20px;">
                 <label for="profile_picture" style="font-size: 16px;">Profile Picture</label>
                 <input type="file" name="profile_picture" id="profile_picture" accept="image/*" style="margin-top: 10px;">

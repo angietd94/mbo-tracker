@@ -68,9 +68,12 @@ def login():
             # Commit the changes to the database
             db.session.commit()
             
-            # Log the user in with remember=False to prevent persistent sessions
-            # This ensures that closing the browser will end the session
-            login_user(user, remember=False)
+            # Check if "Remember Me" was checked
+            remember_me = 'remember_me' in request.form
+            
+            # Log the user in with remember=True if "Remember Me" was checked
+            # This will set a longer session duration (30 days)
+            login_user(user, remember=remember_me)
             
             # Log successful login
             print(f"Successful login: ID={user.id}, Email={user.email}")

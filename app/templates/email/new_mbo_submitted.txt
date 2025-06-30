@@ -1,0 +1,16 @@
+New MBO pending approval – {{ mbo.title }}
+
+Hello {{ manager.first_name }},
+
+{{ mbo.creator.first_name }} {{ mbo.creator.last_name }} has submitted a new MBO for your approval:
+
+Title: {{ mbo.title }}
+Type: {{ mbo.mbo_type }}
+Description: {{ mbo.description }}
+
+Please review this MBO at your earliest convenience.
+
+Review MBO: {{ base_url }}/mbo/{{ mbo.id }}
+
+This is an automated message from the SnapLogic MBO Tracker.
+Sent from: notificationsmbo@snaplogic.com

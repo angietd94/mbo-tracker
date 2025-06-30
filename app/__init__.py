@@ -62,5 +62,9 @@ except ImportError:
 # Import models
 from app import models
 
+# Initialize notifications
+from app import notifications
+notifications.init_app(app)
+
 # Import routes package
 from app.routes import *
