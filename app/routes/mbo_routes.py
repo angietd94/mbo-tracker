@@ -143,6 +143,9 @@ def delete_mbo(mbo_id):
         flash('Not authorized to delete this MBO.', 'danger')
         return redirect(url_for('my_mbos'))
 
+    # Send notification before deleting (since we need MBO data)
+    send_notification('mbo_deleted', mbo)
+    
     db.session.delete(mbo)
     db.session.commit()
     flash('MBO deleted successfully.', 'success')

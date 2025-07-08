@@ -42,10 +42,6 @@ def login():
             # Generate a new session token
             session_token = os.urandom(16).hex()
             
-            # Ensure CSRF token is regenerated
-            from flask_wtf.csrf import generate_csrf
-            generate_csrf()
-            
             # Store the session token in the database
             # This will invalidate any existing sessions for this user
             existing_setting = UserSettings.query.filter_by(

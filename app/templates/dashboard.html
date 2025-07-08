@@ -44,61 +44,33 @@
 <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
   <h3 style="margin-top: 0; color: #0046ad; margin-bottom: 15px;">Your MBO Points Summary</h3>
   
-  {% set learning_points = 0 %}
-  {% set demo_points = 0 %}
-  {% set impact_points = 0 %}
-  
-  {% for mbo in learning_mbos %}
-    {% if mbo.creator.id == current_user.id %}
-      {% set learning_points = learning_points + mbo.points|default(0) %}
-    {% endif %}
-  {% endfor %}
-  
-  {% for mbo in demo_mbos %}
-    {% if mbo.creator.id == current_user.id %}
-      {% set demo_points = demo_points + mbo.points|default(0) %}
-    {% endif %}
-  {% endfor %}
-  
-  {% for mbo in impact_mbos %}
-    {% if mbo.creator.id == current_user.id %}
-      {% set impact_points = impact_points + mbo.points|default(0) %}
-    {% endif %}
-  {% endfor %}
-  
-  {% set total_points = learning_points + demo_points + impact_points %}
-  {% set learning_over = learning_points > 6 %}
-  {% set demo_over = demo_points > 4 %}
-  {% set impact_over = impact_points > 8 %}
-  
   <div style="margin-bottom: 20px;">
     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-      <span style="font-weight: 500;">Total Points: {{ total_points }}/15</span>
-      <span style="font-weight: 500;">{{ (total_points / 15 * 100)|round }}%</span>
+      <span style="font-weight: 500;">
+        Total Points: {{ points_summary.total_points }}/{{ points_summary.max_total }}
+      </span>
+      <span style="font-weight: 500;">
+        {{ points_summary.percent }}%
+      </span>
     </div>
     
     <div style="height: 25px; background-color: #e9ecef; border-radius: 4px; overflow: hidden; position: relative;">
       <!-- Learning segment -->
-      {% set learning_width = (learning_points / 15 * 100)|round %}
-      <div style="position: absolute; left: 0; top: 0; height: 100%; width: {{ learning_width }}%; background-color: #6366f1; display: flex; align-items: center; justify-content: center;">
-        {% if learning_width > 10 %}
-        <span style="color: white; font-size: 12px; font-weight: 500;">{{ learning_points }}</span>
+      <div style="position: absolute; left: 0; top: 0; height: 100%; width: {{ points_summary['Learning and Certification'].width }}%; background-color: #6366f1; display: flex; align-items: center; justify-content: center;">
+        {% if points_summary['Learning and Certification'].width > 10 %}
+        <span style="color: white; font-size: 12px; font-weight: 500;">{{ points_summary['Learning and Certification'].points }}</span>
         {% endif %}
       </div>
-      
       <!-- Demo segment -->
-      {% set demo_width = (demo_points / 15 * 100)|round %}
-      <div style="position: absolute; left: {{ learning_width }}%; top: 0; height: 100%; width: {{ demo_width }}%; background-color: #f59e0b; display: flex; align-items: center; justify-content: center;">
-        {% if demo_width > 10 %}
-        <span style="color: white; font-size: 12px; font-weight: 500;">{{ demo_points }}</span>
+      <div style="position: absolute; left: {{ points_summary['Learning and Certification'].width }}%; top: 0; height: 100%; width: {{ points_summary['Demo & Assets'].width }}%; background-color: #f59e0b; display: flex; align-items: center; justify-content: center;">
+        {% if points_summary['Demo & Assets'].width > 10 %}
+        <span style="color: white; font-size: 12px; font-weight: 500;">{{ points_summary['Demo & Assets'].points }}</span>
         {% endif %}
       </div>
-      
       <!-- Impact segment -->
-      {% set impact_width = (impact_points / 15 * 100)|round %}
-      <div style="position: absolute; left: {{ learning_width + demo_width }}%; top: 0; height: 100%; width: {{ impact_width }}%; background-color: #10b981; display: flex; align-items: center; justify-content: center;">
-        {% if impact_width > 10 %}
-        <span style="color: white; font-size: 12px; font-weight: 500;">{{ impact_points }}</span>
+      <div style="position: absolute; left: {{ points_summary['Learning and Certification'].width + points_summary['Demo & Assets'].width }}%; top: 0; height: 100%; width: {{ points_summary['Impact Outside of Pod'].width }}%; background-color: #10b981; display: flex; align-items: center; justify-content: center;">
+        {% if points_summary['Impact Outside of Pod'].width > 10 %}
+        <span style="color: white; font-size: 12px; font-weight: 500;">{{ points_summary['Impact Outside of Pod'].points }}</span>
         {% endif %}
       </div>
     </div>
@@ -111,43 +83,41 @@
       <div style="display: flex; align-items: center; margin-bottom: 5px;">
         <div style="width: 15px; height: 15px; background-color: #6366f1; margin-right: 8px; border-radius: 3px;"></div>
         <span style="font-weight: 500;">Learning & Certification</span>
-        {% if learning_over %}
-        <span style="margin-left: 5px; color: #ef4444; font-size: 18px;" title="Exceeds maximum allowed points (6)">⚠️</span>
+        {% if points_summary['Learning and Certification'].over %}
+        <span style="margin-left: 5px; color: #ef4444; font-size: 18px;" title="Exceeds maximum allowed points ({{ point_rules['Learning and Certification'].max }})">⚠️</span>
         {% endif %}
       </div>
       <div style="display: flex; justify-content: space-between;">
-        <span>{{ learning_points }} points</span>
-        <span style="color: #6b7280;">Target: 4, Max: 6</span>
+        <span>{{ points_summary['Learning and Certification'].points }} points</span>
+        <span style="color: #6b7280;">Target: {{ point_rules['Learning and Certification'].target }}, Max: {{ point_rules['Learning and Certification'].max }}</span>
       </div>
     </div>
-    
     <!-- Demo -->
     <div style="flex: 1; min-width: 200px;">
       <div style="display: flex; align-items: center; margin-bottom: 5px;">
         <div style="width: 15px; height: 15px; background-color: #f59e0b; margin-right: 8px; border-radius: 3px;"></div>
         <span style="font-weight: 500;">Demo & Assets</span>
-        {% if demo_over %}
-        <span style="margin-left: 5px; color: #ef4444; font-size: 18px;" title="Exceeds maximum allowed points (4)">⚠️</span>
+        {% if points_summary['Demo & Assets'].over %}
+        <span style="margin-left: 5px; color: #ef4444; font-size: 18px;" title="Exceeds maximum allowed points ({{ point_rules['Demo & Assets'].max }})">⚠️</span>
         {% endif %}
       </div>
       <div style="display: flex; justify-content: space-between;">
-        <span>{{ demo_points }} points</span>
-        <span style="color: #6b7280;">Target: 2, Max: 4</span>
+        <span>{{ points_summary['Demo & Assets'].points }} points</span>
+        <span style="color: #6b7280;">Target: {{ point_rules['Demo & Assets'].target }}, Max: {{ point_rules['Demo & Assets'].max }}</span>
       </div>
     </div>
-    
     <!-- Impact -->
     <div style="flex: 1; min-width: 200px;">
       <div style="display: flex; align-items: center; margin-bottom: 5px;">
         <div style="width: 15px; height: 15px; background-color: #10b981; margin-right: 8px; border-radius: 3px;"></div>
         <span style="font-weight: 500;">Impact Outside of Pod</span>
-        {% if impact_over %}
-        <span style="margin-left: 5px; color: #ef4444; font-size: 18px;" title="Exceeds maximum allowed points (8)">⚠️</span>
+        {% if points_summary['Impact Outside of Pod'].over %}
+        <span style="margin-left: 5px; color: #ef4444; font-size: 18px;" title="Exceeds maximum allowed points ({{ point_rules['Impact Outside of Pod'].max }})">⚠️</span>
         {% endif %}
       </div>
       <div style="display: flex; justify-content: space-between;">
-        <span>{{ impact_points }} points</span>
-        <span style="color: #6b7280;">Target: 4, Max: 8</span>
+        <span>{{ points_summary['Impact Outside of Pod'].points }} points</span>
+        <span style="color: #6b7280;">Target: {{ point_rules['Impact Outside of Pod'].target }}, Max: {{ point_rules['Impact Outside of Pod'].max }}</span>
       </div>
     </div>
   </div>

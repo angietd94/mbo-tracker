@@ -1,9 +1,11 @@
 """
 Email utility functions for the MBO Tracker application.
 
-This module provides functions for sending emails through the Google Workspace SMTP relay.
-All emails are sent from notificationsmbo@snaplogic.com and CC'd to the same address
+This module provides functions for sending emails through Gmail SMTP.
+All emails are sent from notificationsmbo@snaplogic.com and BCC'd to the same address
 for troubleshooting purposes.
+
+Note: Requires Gmail App Password for authentication.
 """
 import os
 import ssl
@@ -13,27 +15,31 @@ from email.mime.text import MIMEText
 from flask import current_app
 
 # Global SMTP settings
-SMTP_HOST = "smtp-relay.gmail.com"
-SMTP_PORT = 587
+SMTP_HOST = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+SMTP_PORT = int(os.environ.get('MAIL_PORT', 587))
 EMAIL_ENABLED = os.environ.get('EMAIL_ENABLED', 'True').lower() in ['true', 'yes', '1']
 SENDER = "notificationsmbo@snaplogic.com"
-CC_EMAIL = "notificationsmbo@snaplogic.com"
+BCC_EMAIL = "notificationsmbo@snaplogic.com"  # Always BCC to notifications mailbox
+SMTP_USERNAME = os.environ.get('SMTP_USERNAME', os.environ.get('MAIL_USERNAME', 'notificationsmbo@snaplogic.com'))
+SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', os.environ.get('MAIL_PASSWORD', ''))
 
-def send_mail(to, subject, text_body, html_body):
+def send_mail(to, subject, text_body, html_body, cc=None):
     """
-    Send an email using the Google Workspace SMTP relay.
+    Send an email using Gmail SMTP.
     
     Args:
         to (str or list): Recipient email address(es)
         subject (str): Email subject
         text_body (str): Plain text email body
         html_body (str): HTML email body
+        cc (str or list, optional): CC email address(es)
         
     Returns:
         bool: True if email was sent successfully, False otherwise
         
     Note:
-        All emails are CC'd to notificationsmbo@snaplogic.com for troubleshooting.
+        All emails are BCC'd to notificationsmbo@snaplogic.com for troubleshooting.
+        Requires Gmail App Password for authentication.
         Set EMAIL_ENABLED=False in environment variables to disable email sending in development.
     """
     if not EMAIL_ENABLED:
@@ -44,17 +50,30 @@ def send_mail(to, subject, text_body, html_body):
     if isinstance(to, str):
         to = [to]
     
+    # Convert CC to list if provided
+    if cc:
+        if isinstance(cc, str):
+            cc = [cc]
+    else:
+        cc = []
+    
     # Create message
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = SENDER
     msg["To"] = ", ".join(to)
-    msg["Cc"] = CC_EMAIL
     
-    # Add CC to recipients list for actual sending
+    # Add CC header if CC recipients exist
+    if cc:
+        msg["Cc"] = ", ".join(cc)
+    
+    msg["Bcc"] = BCC_EMAIL  # Always BCC to notifications mailbox
+    
+    # Add all recipients (TO + CC + BCC) to recipients list for actual sending
     recipients = to.copy()
-    if CC_EMAIL not in recipients:
-        recipients.append(CC_EMAIL)
+    recipients.extend(cc)
+    if BCC_EMAIL not in recipients:
+        recipients.append(BCC_EMAIL)
     
     # Attach text and HTML parts
     msg.attach(MIMEText(text_body, "plain", "utf-8"))
@@ -72,8 +91,13 @@ def send_mail(to, subject, text_body, html_body):
             server.starttls(context=context)
             current_app.logger.info("STARTTLS established")
             
-            # Send email (no authentication needed for Google Workspace SMTP relay)
-            server.sendmail(SENDER, recipients, msg.as_string())
+            # Authenticate with Gmail using App Password
+            if SMTP_USERNAME and SMTP_PASSWORD:
+                server.login(SMTP_USERNAME, SMTP_PASSWORD)
+                current_app.logger.info("Gmail SMTP authentication successful")
+            
+            # Send email
+            server.sendmail(SENDER, recipients, msg.as_string().encode('utf-8'))
             current_app.logger.info(f"Email sent successfully to {to} with subject: {subject}")
             return True
             

@@ -8,7 +8,7 @@
 
     <div class="profile-card">
         <form method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             
             <!-- Profile Picture Section -->
             <div class="profile-picture-section">
@@ -416,11 +416,8 @@
         var form = document.createElement('form');
         form.method = 'POST';
         form.action = '/remove_profile_picture';
-        var csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrf_token';
-        csrfInput.value = document.querySelector('input[name="csrf_token"]').value;
-        form.appendChild(csrfInput);
+
+
         document.body.appendChild(form);
         form.submit();
       }
@@ -456,11 +453,8 @@
                 var form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/remove_profile_picture';
-                var csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = 'csrf_token';
-                csrfInput.value = document.querySelector('input[name="csrf_token"]').value;
-                form.appendChild(csrfInput);
+
+
                 document.body.appendChild(form);
                 form.submit();
                 // Optionally, after submission the backend should redirect to refresh the page.

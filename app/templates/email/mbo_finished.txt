@@ -1,15 +1,17 @@
-MBO completed – {{ mbo.title }}
+MBO Completed
 
 Hello {{ manager.first_name }},
 
-An MBO has been marked as FINISHED:
+{{ mbo.creator.first_name }} {{ mbo.creator.last_name }} has marked the following MBO as FINISHED and it requires your approval:
 
 Title: {{ mbo.title }}
 Type: {{ mbo.mbo_type }}
-Engineer: {{ mbo.creator.first_name }} {{ mbo.creator.last_name }}
 Description: {{ mbo.description }}
+Status: FINISHED
 
-You can review the completed MBO here: {{ base_url }}/mbo/{{ mbo.id }}
+Please review this completed MBO at your earliest convenience.
+
+Review MBO: {{ base_url }}/pending_approvals
 
 This is an automated message from the SnapLogic MBO Tracker.
 Sent from: notificationsmbo@snaplogic.com

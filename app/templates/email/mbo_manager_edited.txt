@@ -1,0 +1,19 @@
+Your MBO Was Updated
+
+Hello {{ mbo.creator.first_name }},
+
+Your manager has updated your MBO "{{ mbo.title }}":
+
+Title: {{ mbo.title }}
+Type: {{ mbo.mbo_type }}
+Description: {{ mbo.description }}
+Status: {{ mbo.progress_status }}
+Approval Status: {{ mbo.approval_status }}
+{% if mbo.points %}Points: {{ mbo.points }}{% endif %}
+
+Please review the changes to your MBO.
+
+View My MBOs: {{ base_url }}/my_mbos
+
+This is an automated message from the SnapLogic MBO Tracker.
+Sent from: notificationsmbo@snaplogic.com

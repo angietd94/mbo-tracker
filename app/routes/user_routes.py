@@ -378,3 +378,9 @@ def edit_user(user_id):
         return redirect(url_for('users'))
     
     return render_template('edit_user_profile.html', user=user, managers=managers)
+
+@app.route('/compensation_calculator')
+@login_required
+def compensation_calculator():
+    """Compensation calculator page."""
+    return render_template('compensation_calculator.html')

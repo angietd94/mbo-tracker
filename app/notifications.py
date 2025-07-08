@@ -27,135 +27,337 @@ logger = logging.getLogger(__name__)
 # Global scheduler
 scheduler = None
 
-def send_notification(event: str, mbo: MBO) -> None:
+def notify_mbo(event: str, mbo: MBO, actor: User) -> None:
     """
-    Send a notification email based on the event type.
+    Send MBO notification emails based on the event type.
     
     Args:
-        event: Event type (new_mbo, mbo_updated, mbo_deleted)
+        event: Event type ('created', 'approved', 'rejected', 'updated')
         mbo: MBO object
+        actor: User who triggered the event
     """
     app = current_app._get_current_object()
     base_url = app.config.get('BASE_URL', 'http://localhost:5000')
     
     try:
-        if event == 'new_mbo':
-            # Notification for new MBO submission (to manager)
-            if not mbo.creator:
-                logger.debug(f"Cannot send new_mbo notification: creator not found for MBO {mbo.id}")
-                return
+        if event == 'created':
+            # Business rule 1: When a new MBO is created
+            # Send email to employee (creator)
+            if mbo.creator and mbo.creator.email:
+                subject = f"Your MBO '{mbo.title}' is pending manager approval"
                 
-            # Get manager info
-            manager = mbo.creator.manager if mbo.creator.manager else None
-            if not manager or not manager.email:
-                logger.debug(f"Cannot send new_mbo notification: manager not found for MBO {mbo.id}")
-                return
-                
-            subject = f"[MBO] {mbo.creator.get_full_name()} created an MBO"
-            
-            # Render email templates
-            html_body = render_template(
-                'email/new_mbo_submitted.html',
-                mbo=mbo,
-                manager=manager,
-                base_url=base_url
-            )
-            text_body = render_template(
-                'email/new_mbo_submitted.txt',
-                mbo=mbo,
-                manager=manager,
-                base_url=base_url
-            )
-            
-            # Send email
-            send_mail(manager.email, subject, text_body, html_body)
-            
-        elif event == 'mbo_updated':
-            # Notification for MBO updated (to employee)
-            if not mbo.creator or not mbo.creator.email:
-                logger.debug(f"Cannot send mbo_updated notification: creator not found for MBO {mbo.id}")
-                return
-                
-            subject = f"[MBO] Your objective has been {mbo.approval_status.lower()}"
-            
-            # Render email templates
-            html_body = render_template(
-                'email/mbo_updated.html',
-                mbo=mbo,
-                base_url=base_url
-            )
-            text_body = render_template(
-                'email/mbo_updated.txt',
-                mbo=mbo,
-                base_url=base_url
-            )
-            
-            # Send email
-            send_mail(mbo.creator.email, subject, text_body, html_body)
-            
-        elif event == 'mbo_deleted':
-            # Notification for MBO deleted (to manager)
-            if not mbo.creator:
-                logger.debug(f"Cannot send mbo_deleted notification: creator not found for MBO {mbo.id}")
-                return
-                
-            # Get manager info
-            manager = mbo.creator.manager if mbo.creator.manager else None
-            if not manager or not manager.email:
-                logger.debug(f"Cannot send mbo_deleted notification: manager not found for MBO {mbo.id}")
-                return
-                
-            subject = f"[MBO] {mbo.creator.get_full_name()} deleted an MBO"
-            
-            # Create simple email content
-            html_body = f"""
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 5px;">
-                <h2 style="color: #0046ad; margin-bottom: 20px;">MBO Deleted</h2>
-                <p>Hello {manager.first_name},</p>
-                <p>{mbo.creator.get_full_name()} has deleted the following MBO:</p>
-                
-                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <h3 style="margin-top: 0; color: #0046ad;">{mbo.title}</h3>
-                    <p><strong>Type:</strong> {mbo.mbo_type}</p>
-                    <p><strong>Points:</strong> {mbo.points}</p>
-                    <p><strong>Status:</strong> {mbo.approval_status}</p>
+                html_body = f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 5px;">
+                    <h2 style="color: #0046ad; margin-bottom: 20px;">MBO Created Successfully</h2>
+                    <p>Hello {mbo.creator.first_name},</p>
+                    <p>Your MBO has been created and is now pending manager approval:</p>
+                    
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #0046ad;">{mbo.title}</h3>
+                        <p><strong>Type:</strong> {mbo.mbo_type}</p>
+                        <p><strong>Points:</strong> {mbo.points}</p>
+                        <p><strong>Status:</strong> {mbo.approval_status}</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="{base_url}/mbo/{mbo.id}"
+                           style="background-color: #0046ad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                            View MBO
+                        </a>
+                    </div>
+                    
+                    <p style="margin-top: 30px; color: #6c757d; font-size: 0.9em;">
+                        This is an automated message from the SnapLogic MBO Tracker.
+                    </p>
                 </div>
+                """
                 
-                <p style="margin-top: 30px; color: #6c757d; font-size: 0.9em;">
-                    This is an automated message from the SnapLogic MBO Tracker.
-                </p>
-            </div>
-            """
+                text_body = f"""
+                MBO Created Successfully
+                
+                Hello {mbo.creator.first_name},
+                
+                Your MBO has been created and is now pending manager approval:
+                
+                Title: {mbo.title}
+                Type: {mbo.mbo_type}
+                Points: {mbo.points}
+                Status: {mbo.approval_status}
+                
+                View MBO: {base_url}/mbo/{mbo.id}
+                
+                This is an automated message from the SnapLogic MBO Tracker.
+                """
+                
+                # Send email with CC to notifications
+                send_mail([mbo.creator.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com'])
+                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={mbo.creator.email}, cc=notificationsmbo@snaplogic.com, subject={subject}")
             
-            text_body = f"""
-            MBO Deleted
-            
-            Hello {manager.first_name},
-            
-            {mbo.creator.get_full_name()} has deleted the following MBO:
-            
-            Title: {mbo.title}
-            Type: {mbo.mbo_type}
-            Points: {mbo.points}
-            Status: {mbo.approval_status}
-            
-            This is an automated message from the SnapLogic MBO Tracker.
-            """
-            
-            # Send email
-            send_mail(manager.email, subject, text_body, html_body)
-            
+            # Send email to manager
+            if mbo.creator and mbo.creator.manager and mbo.creator.manager.email:
+                manager = mbo.creator.manager
+                subject = f"Approval needed: '{mbo.creator.get_full_name()}' has created new MBO"
+                
+                html_body = f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 5px;">
+                    <h2 style="color: #0046ad; margin-bottom: 20px;">New MBO Requires Approval</h2>
+                    <p>Hello {manager.first_name},</p>
+                    <p>{mbo.creator.get_full_name()} has created a new MBO that requires your approval:</p>
+                    
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #0046ad;">{mbo.title}</h3>
+                        <p><strong>Employee:</strong> {mbo.creator.get_full_name()}</p>
+                        <p><strong>Type:</strong> {mbo.mbo_type}</p>
+                        <p><strong>Points:</strong> {mbo.points}</p>
+                        <p><strong>Description:</strong> {mbo.description}</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="{base_url}/mbo/{mbo.id}"
+                           style="background-color: #0046ad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                            Review & Approve MBO
+                        </a>
+                    </div>
+                    
+                    <p style="margin-top: 30px; color: #6c757d; font-size: 0.9em;">
+                        This is an automated message from the SnapLogic MBO Tracker.
+                    </p>
+                </div>
+                """
+                
+                text_body = f"""
+                New MBO Requires Approval
+                
+                Hello {manager.first_name},
+                
+                {mbo.creator.get_full_name()} has created a new MBO that requires your approval:
+                
+                Title: {mbo.title}
+                Employee: {mbo.creator.get_full_name()}
+                Type: {mbo.mbo_type}
+                Points: {mbo.points}
+                Description: {mbo.description}
+                
+                Review & Approve MBO: {base_url}/mbo/{mbo.id}
+                
+                This is an automated message from the SnapLogic MBO Tracker.
+                """
+                
+                # Send email with CC to notifications
+                send_mail([manager.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com'])
+                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={manager.email}, cc=notificationsmbo@snaplogic.com, subject={subject}")
+                
+        elif event in ['approved', 'rejected']:
+            # Business rule 2: When an MBO is approved or rejected
+            # Send email only to the employee
+            if mbo.creator and mbo.creator.email:
+                status_text = event.upper()
+                subject = f"Your MBO '{mbo.title}' was {status_text}"
+                
+                html_body = f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 5px;">
+                    <h2 style="color: #0046ad; margin-bottom: 20px;">MBO {status_text}</h2>
+                    <p>Hello {mbo.creator.first_name},</p>
+                    <p>Your MBO has been <strong>{status_text.lower()}</strong> by your manager:</p>
+                    
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #0046ad;">{mbo.title}</h3>
+                        <p><strong>Type:</strong> {mbo.mbo_type}</p>
+                        <p><strong>Points:</strong> {mbo.points}</p>
+                        <p><strong>Status:</strong> {mbo.approval_status}</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="{base_url}/mbo/{mbo.id}"
+                           style="background-color: #0046ad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                            View MBO
+                        </a>
+                    </div>
+                    
+                    <p style="margin-top: 30px; color: #6c757d; font-size: 0.9em;">
+                        This is an automated message from the SnapLogic MBO Tracker.
+                    </p>
+                </div>
+                """
+                
+                text_body = f"""
+                MBO {status_text}
+                
+                Hello {mbo.creator.first_name},
+                
+                Your MBO has been {status_text.lower()} by your manager:
+                
+                Title: {mbo.title}
+                Type: {mbo.mbo_type}
+                Points: {mbo.points}
+                Status: {mbo.approval_status}
+                
+                View MBO: {base_url}/mbo/{mbo.id}
+                
+                This is an automated message from the SnapLogic MBO Tracker.
+                """
+                
+                # Send email with CC to notifications
+                send_mail([mbo.creator.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com'])
+                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={mbo.creator.email}, cc=notificationsmbo@snaplogic.com, subject={subject}")
+                
+        elif event == 'updated':
+            # Business rule 3: When an MBO is updated in any way after creation
+            # Send email only to the employee
+            if mbo.creator and mbo.creator.email:
+                subject = f"Your MBO '{mbo.title}' was updated"
+                
+                html_body = f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 5px;">
+                    <h2 style="color: #0046ad; margin-bottom: 20px;">MBO Updated</h2>
+                    <p>Hello {mbo.creator.first_name},</p>
+                    <p>Your MBO has been updated:</p>
+                    
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #0046ad;">{mbo.title}</h3>
+                        <p><strong>Type:</strong> {mbo.mbo_type}</p>
+                        <p><strong>Points:</strong> {mbo.points}</p>
+                        <p><strong>Status:</strong> {mbo.approval_status}</p>
+                        <p><strong>Progress:</strong> {mbo.progress_status}</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="{base_url}/mbo/{mbo.id}"
+                           style="background-color: #0046ad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                            View MBO
+                        </a>
+                    </div>
+                    
+                    <p style="margin-top: 30px; color: #6c757d; font-size: 0.9em;">
+                        This is an automated message from the SnapLogic MBO Tracker.
+                    </p>
+                </div>
+                """
+                
+                text_body = f"""
+                MBO Updated
+                
+                Hello {mbo.creator.first_name},
+                
+                Your MBO has been updated:
+                
+                Title: {mbo.title}
+                Type: {mbo.mbo_type}
+                Points: {mbo.points}
+                Status: {mbo.approval_status}
+                Progress: {mbo.progress_status}
+                
+                View MBO: {base_url}/mbo/{mbo.id}
+                
+                This is an automated message from the SnapLogic MBO Tracker.
+                """
+                
+                # Send email with CC to notifications
+                send_mail([mbo.creator.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com'])
+                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={mbo.creator.email}, cc=notificationsmbo@snaplogic.com, subject={subject}")
+        
         else:
             logger.warning(f"Unknown notification event type: {event}")
             return
             
-        # Log that email was sent
-        logger.info(f"Email notification sent: {event} for MBO {mbo.id}")
-        
     except Exception as e:
         logger.error(f"Error sending notification email: {str(e)}")
         import traceback
         logger.error(traceback.format_exc())
+        # Re-raise in non-test environments to return 5xx
+        if not current_app.config.get('TESTING', False):
+            raise
+
+
+def send_notification(event: str, mbo: MBO) -> None:
+    """
+    Legacy function for backward compatibility.
+    Maps old event names to new notify_mbo function.
+    """
+    # Map old events to new events
+    event_mapping = {
+        'new_mbo': 'created',
+        'mbo_updated': 'approved',  # This was used for approval notifications
+        'mbo_finished': 'updated',  # This was used for progress updates
+        'mbo_manager_edited': 'updated',
+        'mbo_deleted': 'deleted'  # Keep this for deletion notifications
+    }
+    
+    if event in event_mapping:
+        if event == 'mbo_deleted':
+            # Handle deletion separately as it doesn't fit the new pattern
+            _handle_mbo_deletion(mbo)
+        else:
+            # Use the current user as actor (this is a limitation of the legacy interface)
+            from flask_login import current_user
+            actor = current_user if current_user.is_authenticated else mbo.creator
+            notify_mbo(event_mapping[event], mbo, actor)
+    else:
+        logger.warning(f"Unknown legacy notification event type: {event}")
+
+
+def _handle_mbo_deletion(mbo: MBO) -> None:
+    """Handle MBO deletion notifications (legacy behavior)."""
+    app = current_app._get_current_object()
+    base_url = app.config.get('BASE_URL', 'http://localhost:5000')
+    
+    try:
+        if not mbo.creator:
+            logger.debug(f"Cannot send mbo_deleted notification: creator not found for MBO {mbo.id}")
+            return
+            
+        # Get manager info
+        manager = mbo.creator.manager if mbo.creator.manager else None
+        if not manager or not manager.email:
+            logger.debug(f"Cannot send mbo_deleted notification: manager not found for MBO {mbo.id}")
+            return
+            
+        subject = f"[MBO] {mbo.creator.get_full_name()} deleted an MBO"
+        
+        # Create simple email content
+        html_body = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 5px;">
+            <h2 style="color: #0046ad; margin-bottom: 20px;">MBO Deleted</h2>
+            <p>Hello {manager.first_name},</p>
+            <p>{mbo.creator.get_full_name()} has deleted the following MBO:</p>
+            
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #0046ad;">{mbo.title}</h3>
+                <p><strong>Type:</strong> {mbo.mbo_type}</p>
+                <p><strong>Points:</strong> {mbo.points}</p>
+                <p><strong>Status:</strong> {mbo.approval_status}</p>
+            </div>
+            
+            <p style="margin-top: 30px; color: #6c757d; font-size: 0.9em;">
+                This is an automated message from the SnapLogic MBO Tracker.
+            </p>
+        </div>
+        """
+        
+        text_body = f"""
+        MBO Deleted
+        
+        Hello {manager.first_name},
+        
+        {mbo.creator.get_full_name()} has deleted the following MBO:
+        
+        Title: {mbo.title}
+        Type: {mbo.mbo_type}
+        Points: {mbo.points}
+        Status: {mbo.approval_status}
+        
+        This is an automated message from the SnapLogic MBO Tracker.
+        """
+        
+        # Send email
+        send_mail([manager.email], subject, text_body, html_body)
+        logger.info(f"Email notification sent: event=mbo_deleted, mbo_id={mbo.id}, to={manager.email}, subject={subject}")
+        
+    except Exception as e:
+        logger.error(f"Error sending mbo_deleted notification: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+
 
 def send_quarter_end_reminder():
     """
@@ -266,7 +468,11 @@ def _after_insert_listener(mapper, connection, target):
     """
     try:
         logger.info(f"After insert event triggered for MBO {target.id}: {target.title}")
-        send_notification('new_mbo', target)
+        # Load the creator relationship manually since refresh doesn't work in event listeners
+        from app.models import User
+        creator = db.session.get(User, target.user_id) if target.user_id else None
+        # Use the creator as the actor for MBO creation
+        notify_mbo('created', target, creator)
     except Exception as e:
         logger.error(f"Error in after_insert listener: {str(e)}")
         import traceback
@@ -280,10 +486,71 @@ def _after_update_listener(mapper, connection, target):
     try:
         logger.info(f"After update event triggered for MBO {target.id}: {target.title}")
         
-        # Check if MBO is accepted or manager edited any field
-        if target.approval_status in ["Approved", "Accepted"]:
-            logger.info(f"MBO {target.id} is {target.approval_status}, sending notification")
-            send_notification('mbo_updated', target)
+        # Load the creator relationship manually
+        from app.models import User
+        creator = db.session.get(User, target.user_id) if target.user_id else None
+        
+        # Get the previous state to detect changes
+        history = db.inspect(target).attrs
+        
+        # Debug logging for approval status history
+        logger.info(f"Checking approval status history for MBO {target.id}")
+        logger.info(f"Current approval_status: {target.approval_status}")
+        if hasattr(history.approval_status, 'history'):
+            logger.info(f"Has approval_status history: {history.approval_status.history}")
+            if history.approval_status.history and history.approval_status.history.deleted:
+                old_status = history.approval_status.history.deleted[0]
+                logger.info(f"Old approval_status: {old_status}")
+            else:
+                logger.info("No deleted values in approval_status history")
+        else:
+            logger.info("No approval_status history attribute")
+        
+        # Check if approval status changed to approved or rejected
+        approval_status_changed = False
+        if hasattr(history.approval_status, 'history') and history.approval_status.history:
+            old_status = history.approval_status.history.deleted[0] if history.approval_status.history.deleted else None
+            logger.info(f"Comparing old_status '{old_status}' with current '{target.approval_status}'")
+            if old_status != target.approval_status and old_status is not None:  # Only if there was a real change from an existing value
+                approval_status_changed = True
+                logger.info(f"Approval status changed from '{old_status}' to '{target.approval_status}'")
+                if target.approval_status == "Approved":
+                    logger.info(f"MBO {target.id} was approved, sending notification to employee")
+                    # Use manager as actor for approval
+                    manager = db.session.get(User, creator.manager_id) if creator and creator.manager_id else None
+                    actor = manager if manager else creator
+                    notify_mbo('approved', target, actor)
+                    return  # Don't send update notification for approval changes
+                elif target.approval_status == "Rejected":
+                    logger.info(f"MBO {target.id} was rejected, sending notification to employee")
+                    # Use manager as actor for rejection
+                    manager = db.session.get(User, creator.manager_id) if creator and creator.manager_id else None
+                    actor = manager if manager else creator
+                    notify_mbo('rejected', target, actor)
+                    return  # Don't send update notification for rejection changes
+            else:
+                logger.info(f"No significant approval status change detected")
+        
+        # Check if any other field was modified (general update notification)
+        modified_fields = []
+        for attr_name in ['title', 'description', 'mbo_type', 'points', 'optional_link', 'progress_status']:
+            attr = getattr(history, attr_name, None)
+            if attr and hasattr(attr, 'history') and attr.history and attr.history.deleted:
+                old_value = attr.history.deleted[0]
+                new_value = getattr(target, attr_name)
+                if old_value != new_value:
+                    modified_fields.append(attr_name)
+        
+        logger.info(f"Modified fields: {modified_fields}, approval_status_changed: {approval_status_changed}")
+        
+        # Send update notification if fields were modified and it wasn't an approval status change
+        if modified_fields and not approval_status_changed:
+            logger.info(f"MBO {target.id} was updated (fields: {', '.join(modified_fields)}), sending notification to employee")
+            # Use current user as actor, fallback to creator
+            from flask_login import current_user
+            actor = current_user if current_user.is_authenticated else creator
+            notify_mbo('updated', target, actor)
+                
     except Exception as e:
         logger.error(f"Error in after_update listener: {str(e)}")
         import traceback
@@ -296,6 +563,7 @@ def _after_delete_listener(mapper, connection, target):
     """
     try:
         logger.info(f"After delete event triggered for MBO {target.id}: {target.title}")
+        # Use legacy deletion handler for now
         send_notification('mbo_deleted', target)
     except Exception as e:
         logger.error(f"Error in after_delete listener: {str(e)}")

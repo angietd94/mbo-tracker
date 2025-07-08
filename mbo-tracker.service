@@ -1,0 +1,15 @@
+[Unit]
+Description=MBO Tracker Flask App
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/mbo-tracker
+EnvironmentFile=/home/ubuntu/mbo-tracker/.env
+ExecStart=/home/ubuntu/mbo-tracker/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:5000 run:app
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

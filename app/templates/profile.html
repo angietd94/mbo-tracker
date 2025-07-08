@@ -27,7 +27,7 @@
             </div>
             
             <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_profile_picture') }}" id="profile-picture-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
                 <div style="margin-bottom: 10px;">
                     <input type="file" name="profile_picture" id="profile_picture" accept="image/*" style="display: none;" onchange="showPreview(this)">
                     <label for="profile_picture" style="background-color: #0046ad; color: white; padding: 8px 15px; border-radius: 4px; cursor: pointer; display: inline-block;">
@@ -80,13 +80,7 @@
                         var form = document.createElement('form');
                         form.method = 'POST';
                         form.action = "{{ url_for('remove_profile_picture') }}";
-                        
-                        // Add CSRF token
-                        var csrfInput = document.createElement('input');
-                        csrfInput.type = 'hidden';
-                        csrfInput.name = 'csrf_token';
-                        csrfInput.value = "{{ csrf_token() }}";
-                        form.appendChild(csrfInput);
+
                         
                         // Append form to body and submit
                         document.body.appendChild(form);
@@ -104,7 +98,7 @@
     <!-- Profile Information Section -->
     <div style="flex: 1; min-width: 300px;">
         <form method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
             <div>
                 <label for="first_name">First Name:</label>
                 <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}">

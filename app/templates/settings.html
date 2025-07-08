@@ -8,7 +8,7 @@
         <h2 style="color: #0046ad; margin-top: 0; border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">Profile Settings</h2>
         
         <form method="POST" action="{{ url_for('settings') }}" enctype="multipart/form-data">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
             
             <div style="margin-bottom: 20px;">
                 <label for="profile_picture" style="font-size: 16px;">Profile Picture</label>

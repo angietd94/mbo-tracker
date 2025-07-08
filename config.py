@@ -12,6 +12,7 @@ except ImportError:
 class Config:
     """Base configuration."""
     # Flask
+    WTF_CSRF_ENABLED = False  # Disable CSRF globally
     SECRET_KEY = os.environ.get('SECRET_KEY')
     if not SECRET_KEY:
         SECRET_KEY = 'default-dev-key-replace-in-production'

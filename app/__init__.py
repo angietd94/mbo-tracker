@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
-from flask_wtf.csrf import CSRFProtect
 import os
 
 # Load environment variables from .env file if python-dotenv is available
@@ -41,7 +40,6 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access
 app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # Session timeout in seconds (1 hour)
 app.config['SESSION_USE_SIGNER'] = True  # Sign the session cookie
 mail = Mail(app)
-csrf = CSRFProtect(app)
 
 # Initialize Talisman for secure headers if available
 try:
@@ -65,6 +63,10 @@ from app import models
 # Initialize notifications
 from app import notifications
 notifications.init_app(app)
+
+# Register error handlers
+from app.error_handlers import register_error_handlers
+register_error_handlers(app)
 
 # Import routes package
 from app.routes import *
