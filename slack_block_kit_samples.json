@@ -1,0 +1,293 @@
+{
+  "manager_approval_message": {
+    "description": "Interactive message sent to managers for MBO approval",
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "*MBO Approval Required*\n\n*Employee:* John Doe\n*Title:* Q4 Sales Target\n*Description:* Achieve 120% of quarterly sales target by focusing on enterprise clients and expanding market share in the technology sector."
+        }
+      },
+      {
+        "type": "actions",
+        "elements": [
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "✅ Approve"
+            },
+            "style": "primary",
+            "action_id": "approve_mbo",
+            "value": "mbo_123"
+          },
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "❌ Decline"
+            },
+            "style": "danger",
+            "action_id": "decline_mbo",
+            "value": "mbo_123"
+          }
+        ]
+      }
+    ]
+  },
+  "manager_approval_updated_approved": {
+    "description": "Message after manager clicks Approve button",
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "*MBO Approved* ✅\n\n*Employee:* John Doe\n*Title:* Q4 Sales Target\n*Status:* Approved by Manager Name\n*Date:* 2025-01-09 14:30:00"
+        }
+      }
+    ]
+  },
+  "manager_approval_updated_declined": {
+    "description": "Message after manager clicks Decline button",
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "*MBO Declined* ❌\n\n*Employee:* John Doe\n*Title:* Q4 Sales Target\n*Status:* Declined by Manager Name\n*Date:* 2025-01-09 14:30:00\n*Note:* Employee has been notified to review and resubmit."
+        }
+      }
+    ]
+  },
+  "employee_notification_created": {
+    "description": "Plain text notification sent to employee when MBO is created",
+    "text": "Your MBO 'Q4 Sales Target' has been submitted for approval."
+  },
+  "employee_notification_approved": {
+    "description": "Plain text notification sent to employee when MBO is approved",
+    "text": "Your MBO 'Q4 Sales Target' has been approved by Manager Name."
+  },
+  "employee_notification_declined": {
+    "description": "Plain text notification sent to employee when MBO is declined",
+    "text": "Your MBO 'Q4 Sales Target' has been declined by Manager Name. Please review and resubmit."
+  },
+  "angelica_bcc_message": {
+    "description": "Copy of manager message sent to Angelica for troubleshooting",
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "*[BCC] MBO Approval Required*\n\n*Employee:* John Doe\n*Manager:* Manager Name\n*Title:* Q4 Sales Target\n*Description:* Achieve 120% of quarterly sales target by focusing on enterprise clients and expanding market share in the technology sector."
+        }
+      },
+      {
+        "type": "actions",
+        "elements": [
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "✅ Approve"
+            },
+            "style": "primary",
+            "action_id": "approve_mbo",
+            "value": "mbo_123"
+          },
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "❌ Decline"
+            },
+            "style": "danger",
+            "action_id": "decline_mbo",
+            "value": "mbo_123"
+          }
+        ]
+      }
+    ]
+  },
+  "mbo_completed_approval": {
+    "description": "Interactive message when employee marks MBO as completed",
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "*MBO Completion Approval Required*\n\n*Employee:* John Doe\n*Title:* Q4 Sales Target\n*Status:* Marked as Complete\n*Completion Notes:* Achieved 125% of target, exceeded expectations with new enterprise deals."
+        }
+      },
+      {
+        "type": "actions",
+        "elements": [
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "✅ Approve Completion"
+            },
+            "style": "primary",
+            "action_id": "approve_mbo",
+            "value": "mbo_123"
+          },
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "❌ Request Changes"
+            },
+            "style": "danger",
+            "action_id": "decline_mbo",
+            "value": "mbo_123"
+          }
+        ]
+      }
+    ]
+  },
+  "mbo_edited_approval": {
+    "description": "Interactive message when employee edits an existing MBO",
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "*MBO Edit Approval Required*\n\n*Employee:* John Doe\n*Title:* Q4 Sales Target (Edited)\n*Changes:* Updated target from 120% to 130% based on market opportunities\n*New Description:* Achieve 130% of quarterly sales target by focusing on enterprise clients and expanding market share in the technology sector."
+        }
+      },
+      {
+        "type": "actions",
+        "elements": [
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "✅ Approve Changes"
+            },
+            "style": "primary",
+            "action_id": "approve_mbo",
+            "value": "mbo_123"
+          },
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "❌ Reject Changes"
+            },
+            "style": "danger",
+            "action_id": "decline_mbo",
+            "value": "mbo_123"
+          }
+        ]
+      }
+    ]
+  },
+  "slack_interaction_payload": {
+    "description": "Example payload received when user clicks a button",
+    "type": "block_actions",
+    "user": {
+      "id": "U123MANAGER",
+      "username": "manager.name",
+      "name": "manager.name",
+      "team_id": "T123TEAM"
+    },
+    "api_app_id": "A123APP",
+    "token": "verification_token_here",
+    "container": {
+      "type": "message",
+      "message_ts": "1641234567.123456"
+    },
+    "trigger_id": "123456789.987654321.abcdef123456",
+    "team": {
+      "id": "T123TEAM",
+      "domain": "your-workspace"
+    },
+    "enterprise": null,
+    "is_enterprise_install": false,
+    "channel": {
+      "id": "D123CHANNEL",
+      "name": "directmessage"
+    },
+    "message": {
+      "type": "message",
+      "subtype": "bot_message",
+      "text": "This content can't be displayed.",
+      "ts": "1641234567.123456",
+      "bot_id": "B123BOT",
+      "blocks": [
+        {
+          "type": "section",
+          "block_id": "section_block_id",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*MBO Approval Required*\n\n*Employee:* John Doe\n*Title:* Q4 Sales Target"
+          }
+        }
+      ]
+    },
+    "state": {
+      "values": {}
+    },
+    "response_url": "https://hooks.slack.com/actions/T123TEAM/123456789/abcdef123456",
+    "actions": [
+      {
+        "action_id": "approve_mbo",
+        "block_id": "actions_block_id",
+        "text": {
+          "type": "plain_text",
+          "text": "✅ Approve"
+        },
+        "value": "mbo_123",
+        "style": "primary",
+        "type": "button",
+        "action_ts": "1641234567.123456"
+      }
+    ]
+  },
+  "deduplication_examples": {
+    "description": "Examples of how deduplication cache keys are generated",
+    "examples": [
+      {
+        "scenario": "Manager receives MBO created notification",
+        "cache_key": "U123MANAGER:mbo_123:created",
+        "ttl_seconds": 60
+      },
+      {
+        "scenario": "Manager receives MBO completed notification",
+        "cache_key": "U123MANAGER:mbo_456:completed",
+        "ttl_seconds": 60
+      },
+      {
+        "scenario": "Employee receives approval notification",
+        "cache_key": "U123EMPLOYEE:mbo_123:approved",
+        "ttl_seconds": 60
+      }
+    ]
+  },
+  "environment_variables": {
+    "description": "Required environment variables for Slack integration",
+    "variables": {
+      "SLACK_BOT_TOKEN": {
+        "description": "Bot User OAuth Token from Slack app OAuth page",
+        "example": "your_slack_bot_token_from_oauth_page",
+        "required": true
+      },
+      "SLACK_SIGNING_SECRET": {
+        "description": "Signing Secret from Slack app Basic Information page",
+        "example": "your_signing_secret_from_basic_info_page",
+        "required": true
+      },
+      "SLACK_ANGELICA_ID": {
+        "description": "Angelica's Slack user ID for BCC functionality",
+        "example": "U123ANGELICA",
+        "required": false
+      },
+      "BASE_URL": {
+        "description": "Base URL of the application for Slack interactions",
+        "example": "https://your-domain.com",
+        "required": true
+      }
+    }
+  }
+}
