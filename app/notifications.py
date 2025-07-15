@@ -1,16 +1,28 @@
 """
 Notifications module for MBO Tracker.
 
-This module handles email notifications for MBO-related events.
+This module handles email and Slack notifications for MBO-related events.
 """
 import threading
 import logging
 import datetime
 import os
 from flask import render_template, current_app
-from app import db
+from flask_sqlalchemy import SQLAlchemy
 from app.models import MBO, User
 from app.utils.email import send_mail
+
+# Set up logger first
+logger = logging.getLogger(__name__)
+
+# Try to import Slack functionality
+try:
+    from app.notifications.slack_improved import send_slack_notification
+    SLACK_AVAILABLE = True
+except ImportError:
+    SLACK_AVAILABLE = False
+    logger.warning("Slack notifications not available - slack_improved module not found")
+
 # Import APScheduler only if enabled
 ENABLE_SCHEDULER = os.environ.get('ENABLE_SCHEDULER', 'False').lower() in ['true', 'yes', '1']
 if ENABLE_SCHEDULER:
@@ -20,9 +32,6 @@ if ENABLE_SCHEDULER:
     except ImportError:
         logger.warning("APScheduler not installed. Quarter-end reminders will be disabled.")
         ENABLE_SCHEDULER = False
-
-# Set up logger
-logger = logging.getLogger(__name__)
 
 # Global scheduler
 scheduler = None
@@ -60,7 +69,7 @@ def notify_mbo(event: str, mbo: MBO, actor: User) -> None:
                     </div>
                     
                     <div style="text-align: center; margin-top: 30px;">
-                        <a href="{base_url}/mbo/{mbo.id}"
+                        <a href="{base_url}/mbo_details/{mbo.id}"
                            style="background-color: #0046ad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
                             View MBO
                         </a>
@@ -84,14 +93,30 @@ def notify_mbo(event: str, mbo: MBO, actor: User) -> None:
                 Points: {mbo.points}
                 Status: {mbo.approval_status}
                 
-                View MBO: {base_url}/mbo/{mbo.id}
+                View MBO: {base_url}/mbo_details/{mbo.id}
                 
                 This is an automated message from the SnapLogic MBO Tracker.
                 """
                 
-                # Send email with CC to notifications
-                send_mail([mbo.creator.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com'])
-                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={mbo.creator.email}, cc=notificationsmbo@snaplogic.com, subject={subject}")
+                # Send email with CC to notifications and atdughetti@snaplogic.com
+                send_mail([mbo.creator.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com', 'atdughetti@snaplogic.com'])
+                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={mbo.creator.email}, cc=notificationsmbo@snaplogic.com,atdughetti@snaplogic.com, subject={subject}")
+                
+                # Send Slack notification to employee
+                if SLACK_AVAILABLE:
+                    try:
+                        mbo_data = {
+                            'id': mbo.id,
+                            'title': mbo.title,
+                            'description': mbo.description,
+                            'employee_name': mbo.creator.get_full_name(),
+                            'employee_slack_id': mbo.creator.email,
+                            'manager_slack_id': mbo.creator.manager.email if mbo.creator.manager else None
+                        }
+                        send_slack_notification('mbo_created', mbo_data)
+                        logger.info(f"Slack notification sent: event=mbo_created, mbo_id={mbo.id}, to={mbo.creator.get_full_name()}")
+                    except Exception as slack_error:
+                        logger.error(f"Failed to send Slack notification to employee: {str(slack_error)}")
             
             # Send email to manager
             if mbo.creator and mbo.creator.manager and mbo.creator.manager.email:
@@ -113,7 +138,7 @@ def notify_mbo(event: str, mbo: MBO, actor: User) -> None:
                     </div>
                     
                     <div style="text-align: center; margin-top: 30px;">
-                        <a href="{base_url}/mbo/{mbo.id}"
+                        <a href="{base_url}/mbo_details/{mbo.id}"
                            style="background-color: #0046ad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
                             Review & Approve MBO
                         </a>
@@ -138,14 +163,29 @@ def notify_mbo(event: str, mbo: MBO, actor: User) -> None:
                 Points: {mbo.points}
                 Description: {mbo.description}
                 
-                Review & Approve MBO: {base_url}/mbo/{mbo.id}
+                Review & Approve MBO: {base_url}/mbo_details/{mbo.id}
                 
                 This is an automated message from the SnapLogic MBO Tracker.
                 """
                 
-                # Send email with CC to notifications
-                send_mail([manager.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com'])
-                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={manager.email}, cc=notificationsmbo@snaplogic.com, subject={subject}")
+                # Send email with CC to notifications and atdughetti@snaplogic.com
+                send_mail([manager.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com', 'atdughetti@snaplogic.com'])
+                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={manager.email}, cc=notificationsmbo@snaplogic.com,atdughetti@snaplogic.com, subject={subject}")
+                
+                # Send Slack notification to manager
+                try:
+                    mbo_data = {
+                        'id': mbo.id,
+                        'title': mbo.title,
+                        'description': mbo.description,
+                        'employee_name': mbo.creator.get_full_name(),
+                        'employee_slack_id': getattr(mbo.creator, 'slack_id', None),
+                        'manager_slack_id': getattr(manager, 'slack_id', None)
+                    }
+                    send_slack_notification('mbo_created', mbo_data)
+                    logger.info(f"Slack notification sent: event=mbo_created, mbo_id={mbo.id}, to={manager.get_full_name()}")
+                except Exception as slack_error:
+                    logger.error(f"Failed to send Slack notification to manager: {str(slack_error)}")
                 
         elif event in ['approved', 'rejected']:
             # Business rule 2: When an MBO is approved or rejected
@@ -168,7 +208,7 @@ def notify_mbo(event: str, mbo: MBO, actor: User) -> None:
                     </div>
                     
                     <div style="text-align: center; margin-top: 30px;">
-                        <a href="{base_url}/mbo/{mbo.id}"
+                        <a href="{base_url}/mbo_details/{mbo.id}"
                            style="background-color: #0046ad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
                             View MBO
                         </a>
@@ -192,14 +232,30 @@ def notify_mbo(event: str, mbo: MBO, actor: User) -> None:
                 Points: {mbo.points}
                 Status: {mbo.approval_status}
                 
-                View MBO: {base_url}/mbo/{mbo.id}
+                View MBO: {base_url}/mbo_details/{mbo.id}
                 
                 This is an automated message from the SnapLogic MBO Tracker.
                 """
                 
-                # Send email with CC to notifications
-                send_mail([mbo.creator.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com'])
-                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={mbo.creator.email}, cc=notificationsmbo@snaplogic.com, subject={subject}")
+                # Send email with CC to notifications and atdughetti@snaplogic.com
+                send_mail([mbo.creator.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com', 'atdughetti@snaplogic.com'])
+                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={mbo.creator.email}, cc=notificationsmbo@snaplogic.com,atdughetti@snaplogic.com, subject={subject}")
+                
+                # Send Slack notification to employee
+                try:
+                    slack_event = 'mbo_approved' if event == 'approved' else 'mbo_rejected'
+                    mbo_data = {
+                        'id': mbo.id,
+                        'title': mbo.title,
+                        'description': mbo.description,
+                        'employee_name': mbo.creator.get_full_name(),
+                        'employee_slack_id': getattr(mbo.creator, 'slack_id', None),
+                        'manager_slack_id': getattr(mbo.creator.manager, 'slack_id', None) if mbo.creator.manager else None
+                    }
+                    send_slack_notification(slack_event, mbo_data)
+                    logger.info(f"Slack notification sent: event={slack_event}, mbo_id={mbo.id}, to={mbo.creator.get_full_name()}")
+                except Exception as slack_error:
+                    logger.error(f"Failed to send Slack notification for {event}: {str(slack_error)}")
                 
         elif event == 'updated':
             # Business rule 3: When an MBO is updated in any way after creation
@@ -222,7 +278,7 @@ def notify_mbo(event: str, mbo: MBO, actor: User) -> None:
                     </div>
                     
                     <div style="text-align: center; margin-top: 30px;">
-                        <a href="{base_url}/mbo/{mbo.id}"
+                        <a href="{base_url}/mbo_details/{mbo.id}"
                            style="background-color: #0046ad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
                             View MBO
                         </a>
@@ -247,14 +303,22 @@ def notify_mbo(event: str, mbo: MBO, actor: User) -> None:
                 Status: {mbo.approval_status}
                 Progress: {mbo.progress_status}
                 
-                View MBO: {base_url}/mbo/{mbo.id}
+                View MBO: {base_url}/mbo_details/{mbo.id}
                 
                 This is an automated message from the SnapLogic MBO Tracker.
                 """
                 
-                # Send email with CC to notifications
-                send_mail([mbo.creator.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com'])
-                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={mbo.creator.email}, cc=notificationsmbo@snaplogic.com, subject={subject}")
+                # Send email with CC to notifications and atdughetti@snaplogic.com
+                send_mail([mbo.creator.email], subject, text_body, html_body, cc=['notificationsmbo@snaplogic.com', 'atdughetti@snaplogic.com'])
+                logger.info(f"Email notification sent: event={event}, mbo_id={mbo.id}, to={mbo.creator.email}, cc=notificationsmbo@snaplogic.com,atdughetti@snaplogic.com, subject={subject}")
+                
+                # Send Slack notification to employee
+                try:
+                    # Note: slack_improved.py doesn't have a specific 'updated' event, so we'll use a generic approach
+                    # or we could extend it to support mbo_updated
+                    logger.info(f"Skipping Slack notification for updated event - not implemented in slack_improved.py")
+                except Exception as slack_error:
+                    logger.error(f"Failed to send Slack notification for updated: {str(slack_error)}")
         
         else:
             logger.warning(f"Unknown notification event type: {event}")
@@ -397,7 +461,9 @@ def send_quarter_end_reminder():
                 logger.info(f"Sending quarter-end reminder emails (14 days before {quarter} ends)")
                 
                 # Get all users
-                users = User.query.all()
+                from flask import current_app
+                db = current_app.extensions['sqlalchemy']
+                users = db.session.execute(db.select(User)).scalars().all()
                 base_url = app.config.get('BASE_URL', 'http://localhost:5000')
                 
                 # Email content
@@ -449,7 +515,7 @@ def send_quarter_end_reminder():
                     """
                     
                     # Send email
-                    send_mail(user.email, subject, text_body, html_body)
+                    send_mail([user.email], subject, text_body, html_body)
                 
                 logger.info(f"Sent quarter-end reminder emails to {len(users)} users")
             else:
@@ -470,6 +536,8 @@ def _after_insert_listener(mapper, connection, target):
         logger.info(f"After insert event triggered for MBO {target.id}: {target.title}")
         # Load the creator relationship manually since refresh doesn't work in event listeners
         from app.models import User
+        from flask import current_app
+        db = current_app.extensions['sqlalchemy']
         creator = db.session.get(User, target.user_id) if target.user_id else None
         # Use the creator as the actor for MBO creation
         notify_mbo('created', target, creator)
@@ -488,6 +556,8 @@ def _after_update_listener(mapper, connection, target):
         
         # Load the creator relationship manually
         from app.models import User
+        from flask import current_app
+        db = current_app.extensions['sqlalchemy']
         creator = db.session.get(User, target.user_id) if target.user_id else None
         
         # Get the previous state to detect changes
@@ -579,6 +649,10 @@ def init_app(app):
     global scheduler
     
     with app.app_context():
+        # Import db from current app context to avoid circular imports
+        from flask import current_app
+        db = current_app.extensions['sqlalchemy']
+        
         # Add debug logging
         logger.info("Initializing notifications module")
         

@@ -34,10 +34,14 @@ def create_default_admin():
     else:
         print(f"Admin user '{admin_email}' already exists.")
 
-# Add a health check endpoint
+# Add health check endpoints
 @app.route('/health')
 def health_check():
     return {'status': 'healthy'}, 200
+
+@app.route('/healthz')
+def healthz_check():
+    return {'status': 'ok'}, 200
 
 if __name__ == '__main__':
     # Check if admin credentials are set

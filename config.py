@@ -47,6 +47,11 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
     ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'docx', 'doc', 'gif'}
     S3_BUCKET = os.environ.get('S3_BUCKET', 'mbo-solutions-engineer-data')
+    
+    # Slack configuration
+    SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN', '')
+    SLACK_SIGNING_SECRET = os.environ.get('SLACK_SIGNING_SECRET', '')
+    SLACK_ANGELICA_ID = os.environ.get('SLACK_ANGELICA_ID', '')
 class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
