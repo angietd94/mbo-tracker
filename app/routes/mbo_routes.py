@@ -403,14 +403,16 @@ def pending_approvals():
     # Get all pending MBOs - for managers, show all pending MBOs, not just team members
     if current_user.role == 'Manager':
         pending_mbos = MBO.query.filter(
-            MBO.approval_status == 'Pending Approval'
+            MBO.approval_status == 'Pending Approval',
+            MBO.progress_status == 'Finished'
         ).order_by(MBO.created_at.desc()).all()
     else:
         # Get all pending MBOs for team members
         team_member_ids = [member.id for member in current_user.team_members]
         pending_mbos = MBO.query.filter(
             MBO.user_id.in_(team_member_ids),
-            MBO.approval_status == 'Pending Approval'
+            MBO.approval_status == 'Pending Approval',
+            MBO.progress_status == 'Finished'
         ).order_by(MBO.created_at.desc()).all()
     
     return render_template('pending_approvals.html', mbos=pending_mbos)
